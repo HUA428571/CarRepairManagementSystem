@@ -21,12 +21,30 @@
     <ClCompile Include="RepairMENU.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Match.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="print.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MENUchoose.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="head.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
     <ClInclude Include="RepairMENU.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="head.h">
+    <ClInclude Include="Match.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="print.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MENUchoose.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

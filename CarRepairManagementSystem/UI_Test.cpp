@@ -1,19 +1,15 @@
 #pragma once
 #include"head.h"
-//# define HEAD
-//#include <time.h>
-//#include <iostream>
-//#include <stdio.h>
-//#include <string>
-//#include <stdlib.h>
-//
-//#include <graphics.h>
-//#include <easyx.h>
-//#include <conio.h>
-//#include <mysql.h>
-//using namespace std;
-//MYSQL mysql;
-//#define FONT "黑体"
+
+MYSQL mysql;
+int UserID;
+char UserName[46]="";
+int Role;
+
+//MYsql的查询操作
+//MYSQL_RES* res; //查询结果集
+//MYSQL_ROW row;  //记录结构体
+
 
 int main()
 {
@@ -28,32 +24,29 @@ int main()
 		exit(-1);
 	}
 
+	//initgraph(1280, 720, EW_NOCLOSE);	// 创建绘图窗口，大小为 1280x720 像素
+	initgraph(1280, 720);	// 创建绘图窗口，大小为 1280x720 像素
 
-
-	//临时测试代码
-	initgraph(1280, 720, EW_NOCLOSE);	// 创建绘图窗口，大小为 1280x720 像素
-	cleardevice();
-	settextcolor(BLACK);
-	setbkmode(TRANSPARENT);
+	//字体相关设置
 	LOGFONT format;
 	gettextstyle(&format);						// 获取当前字体设置
-	format.lfHeight = 30;						// 设置字体高度为30
 	format.lfQuality = PROOF_QUALITY;			// 设置输出效果为最高质量  
 	format.lfPitchAndFamily = FIXED_PITCH;
-	_tcscpy_s(format.lfFaceName, _T("黑体"));	// 设置字体为FONT2_EN
 	settextstyle(&format);						// 设置字体样式
 
-	IMAGE BG;
-	loadimage(&BG, _T(".\\IMAGES\\RepairMENU_Home.png"), 1280, 720);
-	putimage(0, 0, &BG);
 
-	settextstyle(20, 0, FONT);
-	//outtextxy(180, 185, mysql_error(&mysql));
-	outtextxy(180, 215, "连接成功");
-	//outtextxy(100, 130, "注册成功 1  23456789");
 
-	while(1);
 
+
+
+
+	UserID = 1;
+	Role = 2;
+	strcpy(UserName, "B19030314");
+
+	RepairMENU();
+	
+	mysql_close(&mysql);
 
 	return 0;
 }

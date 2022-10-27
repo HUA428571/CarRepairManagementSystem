@@ -1,8 +1,8 @@
 #pragma once
-#include "head.h"
+#include"head.h"
 
-int RepairMENU()
-{
-	cleardevice();
+int RepairMENU();
 
-}
+int RepairMENU_MainMENU();
+
+int RepairMENU_RepairMENU();

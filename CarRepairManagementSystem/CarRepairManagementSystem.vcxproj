@@ -143,11 +143,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Match.cpp" />
+    <ClCompile Include="MENUchoose.cpp" />
+    <ClCompile Include="print.cpp" />
     <ClCompile Include="RepairMENU.cpp" />
     <ClCompile Include="UI_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="head.h" />
+    <ClInclude Include="Match.h" />
+    <ClInclude Include="MENUchoose.h" />
+    <ClInclude Include="print.h" />
     <ClInclude Include="RepairMENU.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
