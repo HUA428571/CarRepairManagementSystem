@@ -19,27 +19,19 @@ using namespace std;
 #include "Match.h"
 #include "print.h"
 #include "MENUchoose.h"
+#include "Function.h"
 
 #endif // !HEAD
 
-//#ifndef STRUCT
-//#define STRUCT
-//
-//MYSQL mysql;
-//
-//#endif // !STRUCT
-
 extern MYSQL mysql;
 extern int UserID;
-extern char UserName[46];
-extern int Role;
-
-//extern MYSQL_RES* res; //查询结果集
-//extern MYSQL_ROW row;  //记录结构体
-
+//extern char UserName[46];
+//extern int Role;
 
 #ifndef STYLE
 #define STYLE
+
+#define tPRICE 150
 
 #define FONT "黑体"
 #define COLOR_BG	 0xF9F9F9
@@ -61,3 +53,8 @@ extern int Role;
 #define COLOR_YELLOW 0x00CCFF
 
 #endif // !STYLE
+
+//常用代码
+//char PrintBuffer[255];
+//sprintf(PrintBuffer, "%d", OrderID);
+//outtextxy(x + 110, y, PrintBuffer);

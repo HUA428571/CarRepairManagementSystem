@@ -3,8 +3,8 @@
 
 MYSQL mysql;
 int UserID;
-char UserName[46]="";
-int Role;
+//char UserName[46]="";
+//int Role;
 
 //MYsql的查询操作
 //MYSQL_RES* res; //查询结果集
@@ -26,6 +26,7 @@ int main()
 
 	//initgraph(1280, 720, EW_NOCLOSE);	// 创建绘图窗口，大小为 1280x720 像素
 	initgraph(1280, 720);	// 创建绘图窗口，大小为 1280x720 像素
+	setbkmode(TRANSPARENT);
 
 	//字体相关设置
 	LOGFONT format;
@@ -40,13 +41,13 @@ int main()
 
 
 
-	UserID = 1;
-	Role = 2;
-	strcpy(UserName, "B19030314");
+	UserID = 23;
+	//Role = 2;
+	//strcpy(UserName, "B19030314");
 
-	RepairMENU();
+	//RepairMENU();
+	RepairMENU_MainMENU();
 	
 	mysql_close(&mysql);
-
 	return 0;
 }

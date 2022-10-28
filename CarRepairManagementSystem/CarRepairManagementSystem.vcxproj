@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Function.cpp" />
     <ClCompile Include="Match.cpp" />
     <ClCompile Include="MENUchoose.cpp" />
     <ClCompile Include="print.cpp" />
@@ -150,6 +151,7 @@
     <ClCompile Include="UI_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Function.h" />
     <ClInclude Include="head.h" />
     <ClInclude Include="Match.h" />
     <ClInclude Include="MENUchoose.h" />
