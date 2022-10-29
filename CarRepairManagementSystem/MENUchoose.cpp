@@ -12,10 +12,15 @@ int StartMENU_MENUChoose()
 		m = GetMouseMsg();
 		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
 		{
-			if (m.y > 280 && m.y < 340 && m.x>470 && m.x < 810)//鼠标按在输入账号区域
+			if (m.y > 290 && m.y < 340 && m.x>470 && m.x < 810)//鼠标按在输入账号区域
 				return 1;
-			if (m.y > 380 && m.y < 440 && m.x>470 && m.x < 810)//鼠标按在输入密码区域
+			if (m.y > 370 && m.y < 420 && m.x>470 && m.x < 810)//鼠标按在输入密码区域
 				return 2;
+			if (m.y > 630 && m.y < 680 && m.x>40 && m.x < 90)//鼠标按在退出区域
+				return 61;
+			if (m.y > 630 && m.y < 680 && m.x>110 && m.x < 270)//鼠标按在访客订单查询区域
+				return 62;
+
 		}
 	}
 }
@@ -216,6 +221,48 @@ int OrderCheckMENU_MENUChoose()
 				return 41;
 			if (m.x > 265 && m.y > 495 && m.x < 295 && m.y < 525)//鼠标按在下一页区域
 				return 42;
+		}
+	}
+}
+int OrderCheckMENU_Visiter_Payed_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 40 && m.y > 630 && m.x < 90 && m.y < 680)//鼠标按在返回区域
+				return 3;
+
+			if (m.x > 155 && m.y > 450 && m.x < 185 && m.y < 480)//鼠标按在上一页区域
+				return 41;
+			if (m.x > 245 && m.y > 450 && m.x < 275 && m.y < 480)//鼠标按在下一页区域
+				return 42;
+		}
+	}
+}
+int OrderCheckMENU_Visiter_UnPay_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 40 && m.y > 630 && m.x < 90 && m.y < 680)//鼠标按在返回区域
+				return 3;
+
+			if (m.x > 155 && m.y > 450 && m.x < 185 && m.y < 480)//鼠标按在上一页区域
+				return 41;
+			if (m.x > 245 && m.y > 450 && m.x < 275 && m.y < 480)//鼠标按在下一页区域
+				return 42;
+			if (m.x > 1020 && m.y > 495 && m.x < 1130 && m.y < 570)//鼠标按在支付区域
+				return 43;
 		}
 	}
 }

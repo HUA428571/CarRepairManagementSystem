@@ -2,6 +2,37 @@
 #include "head.h"
 #include "print.h"
 
+void print_OrderCheckMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\OrderCheckMenu.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+void print_OrderCheckMenu_Visiter_Payed_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\OrderCheckMenu_Visiter_Payed.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+void print_OrderCheckMenu_Visiter_UnPay_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\OrderCheckMenu_Visiter_UnPay.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+
 void print_RepairMENU_MainMENU_background()
 {
 	//设置背景色
@@ -22,8 +53,6 @@ void print_QualityMENU_MainMENU_background()
 	putimage(0, 0, &BG);
 	return;
 }
-
-
 void print_RepairMENU_RepairMENU_background()
 {
 	//设置背景色
@@ -45,18 +74,6 @@ void print_QualityMENU_QualityMENU_background()
 	return;
 }
 
-
-void print_OrderCheckMENU_background()
-{
-	//设置背景色
-	setbkcolor(COLOR_BG);
-	//设置背景
-	IMAGE BG;
-	loadimage(&BG, _T(".\\IMAGES\\OrderCheckMenu.png"), 1280, 720);
-	putimage(0, 0, &BG);
-	return;
-}
-
 void print_order_id(int x, int y, int OrderID)
 {
 	//打印订单号
@@ -68,7 +85,6 @@ void print_order_id(int x, int y, int OrderID)
 	outtextxy(x - OrderID_length * 15, y, buffer_OrderID);
 	return;
 }
-
 
 void print_repair_brief()
 {
@@ -320,7 +336,6 @@ void print_order_info(int x, int y, int OrderID)
 	}
 	return;
 }
-
 void print_description_info(int x, int y, int OrderID)
 {
 	IMAGE Description_Info_BG;
@@ -352,7 +367,6 @@ void print_description_info(int x, int y, int OrderID)
 	}
 	return;
 }
-
 void print_quality_detail_info(int x, int y, int OrderID)
 {
 	IMAGE QualityDetail_Info_BG;
@@ -381,6 +395,39 @@ void print_quality_detail_info(int x, int y, int OrderID)
 	else
 	{
 		outtextxy(x, y + 35, row[0]);
+	}
+	return;
+}
+void print_CarOwner_info(int x, int y, int OrderID)
+{
+	IMAGE CarOwner_Info;
+	loadimage(&CarOwner_Info, _T(".\\IMAGES\\CarOwner_Info.png"), 370, 85);
+	putimage(x, y, &CarOwner_Info);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	//查询数据
+	char query_str[512] = "";
+
+	//查询订单信息
+	sprintf(query_str, "SELECT Owner,Phone FROM order_list WHERE order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+
+	settextcolor(COLOR_GREY_2);
+	settextstyle(20, 0, FONT);
+	if (row == NULL)
+	{
+		outtextxy(x+150, y + 35, "无相关信息");
+		outtextxy(x+150, y + 65, "无相关信息");
+	}
+	else
+	{
+		outtextxy(x + 150, y + 35, row[0]);
+		outtextxy(x + 150, y + 65, row[1]);
 	}
 	return;
 }
@@ -637,18 +684,6 @@ AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, pr
 	}
 	return price_total;
 }
-
-int print_part_rol(int x, int y, MYSQL_ROW row)
-{
-	settextcolor(COLOR_GREY_2);
-	outtextxy(x, y, row[0]);//编号
-	outtextxy(x + 90, y, row[1]);//名称
-	outtextxy(x + 350, y, row[2]);//单价
-	outtextxy(x + 440, y, row[3]);//件数
-	return atoi(row[2]);
-}
-
-
 int print_part_page_OrderCheckMENU(int page, int count, int OrderID)
 {
 	//下标都从0开始（方便sql查询）
@@ -691,5 +726,60 @@ AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, pr
 	}
 	return price_total;
 }
+int print_part_page_OrderCheckMENU_Visiter(int page, int count, int OrderID)
+{
+	//下标都从0开始（方便sql查询）
+	int print_row = 7 * (page - 1);
+	int price_total = 0;
+
+	char query_str[512] = "";
+	//显示定位
+	int x = 160, y = 235;
+	//首先清空显示区域
+	setbkcolor(COLOR_BG);
+	clearrectangle(160, 235, 160 + 500, 235 + 200);
+	settextstyle(20, 0, FONT);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	for (int i = 0; (i < 7) && (print_row < count); i++)
+	{
+		//查询数据
+		sprintf(query_str,
+			"SELECT \
+repair_record.id_RepairRecord, \
+repair_part_storage.PartName, \
+repair_part_storage.Price, \
+repair_record.Num \
+FROM repair_record,repair_part_storage \
+WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+
+		mysql_query(&mysql, query_str);
+		//获取结果集
+		res = mysql_store_result(&mysql);
+		row = mysql_fetch_row(res);
+
+		price_total += print_part_rol(x, y + i * 30, row);
+
+		mysql_free_result(res);
+		print_row++;
+	}
+	return price_total;
+}
+
+
+int print_part_rol(int x, int y, MYSQL_ROW row)
+{
+	settextcolor(COLOR_GREY_2);
+	outtextxy(x, y, row[0]);//编号
+	outtextxy(x + 90, y, row[1]);//名称
+	outtextxy(x + 350, y, row[2]);//单价
+	outtextxy(x + 440, y, row[3]);//件数
+	return atoi(row[2]);
+}
+
+
 
 

@@ -13,3 +13,7 @@ int QualityMENU_QualityMENU_MENUChoose();
 int RepairMENU_RepairMENU_AddPart_MENUChoose();
 
 int OrderCheckMENU_MENUChoose();
+
+int OrderCheckMENU_Visiter_Payed_MENUChoose();
+
+int OrderCheckMENU_Visiter_UnPay_MENUChoose();
