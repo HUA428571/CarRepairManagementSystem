@@ -1,6 +1,263 @@
 #pragma once
 #include"head.h"
 
+int startMENU()
+{
+	cleardevice();
+	settextcolor(BLACK);
+	setbkcolor(COLOR_BG);
+	setbkmode(TRANSPARENT);
+
+	IMAGE BG;
+	IMAGE UserNameBox;
+	IMAGE PassWordBox;
+	IMAGE UserNameWrong;
+	IMAGE PassWordWrong;
+	loadimage(&BG, _T(".\\IMAGES\\StartMenu.png"), 1280, 720);
+	loadimage(&UserNameBox, _T(".\\IMAGES\\UserNameBox.png"), 340, 60);
+	loadimage(&PassWordBox, _T(".\\IMAGES\\PasswordBox.png"), 340, 60);
+	loadimage(&UserNameWrong, _T(".\\IMAGES\\UserNameWrong.png"), 340, 60);
+	loadimage(&PassWordWrong, _T(".\\IMAGES\\PasswordWrong.png"), 340, 60);
+	putimage(0, 0, &BG);
+
+	//以上都是常规代码
+	char buffer_UserName[64];
+
+	char UserNameCheck = 0;
+	char PassWord[50];
+	int Role = 0;
+
+	int MENUchoice;
+	MENUchoice = StartMENU_MENUChoose();
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+			return 0;
+		case 1:
+			putimage(0, 0, &BG);
+			putimage(470, 280, &UserNameBox);
+			CR_InputBox(buffer_UserName, 40, 530, 290, 270, 40, "");
+			setlinecolor(BLACK);
+			line(530, 330, 800, 330);
+			UserNameCheck = 1;
+			MENUchoice = StartMENU_MENUChoose();
+			break;
+		case 2:
+			putimage(470, 380, &PassWordBox);
+			CHR_InputBox(PassWord, 40, 530, 390, 270, 40, "");
+			setlinecolor(BLACK);
+			line(530, 430, 800, 430);
+			if (UserNameCheck == 0)
+			{
+				MENUchoice = StartMENU_MENUChoose();
+			}
+			else
+			{
+				Role = CheckID(buffer_UserName, PassWord);
+				if (Role >= 0)
+					return Role + 100;
+				else
+				{
+					putimage(470, 280, &UserNameWrong);
+					putimage(470, 380, &PassWordWrong);
+					UserNameCheck = 0;
+					MENUchoice = StartMENU_MENUChoose();
+				}
+			}
+			break;
+		}
+	}
+}
+
+
+
+int OrderCheckMENU(int OrderID)
+{
+	//打印背景
+	print_OrderCheckMENU_background();
+
+	//维修页,显示配件使用信息
+	//获取配件使用数
+	int part_count;//配件使用总数
+	int current_page = 0;
+	int max_page = 0;
+	//维修员和质检员姓名
+	char repair_staff_name[16] = "";
+	char quality_staff_name[16] = "";
+	//工时
+	char repair_time[16] = "";
+	int part_price_total = calaulate_part_total_price(OrderID);
+	int time_price_total = 0;
+
+	char PrintBuffer[255];
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//查询配件使用数量
+	sprintf(query_str, "SELECT count(*) FROM repair_record WHERE OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	part_count = atoi(row[0]);
+
+	//查询维修员姓名
+	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.RepairStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+	{
+		strcpy(repair_staff_name, "无信息");
+	}
+	else
+	{
+		strcpy(repair_staff_name, row[0]);
+	}
+
+	//查询质检员姓名
+	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.QualityStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+	{
+		strcpy(quality_staff_name, "无信息");
+	}
+	else
+	{
+		strcpy(quality_staff_name, row[0]);
+	}
+	mysql_free_result(res);
+
+	//查询工时
+	sprintf(query_str, "SELECT RepairTime FROM order_list WHERE order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+	{
+		strcpy(repair_time, "0");
+	}
+	else
+	{
+		strcpy(repair_time, row[0]);
+	}
+	mysql_free_result(res);
+	time_price_total = atoi(repair_time) * tPRICE;
+
+	//打印维修员和质检员信息
+	settextcolor(BLACK);
+	settextstyle(25, 0, FONT);
+	outtextxy(190, 580, repair_staff_name);
+	outtextxy(305, 580, quality_staff_name);
+	outtextxy(420, 580, repair_time);
+	sprintf(PrintBuffer, "%d", time_price_total);
+	outtextxy(510, 580, PrintBuffer);
+	sprintf(PrintBuffer, "%d", part_price_total);
+	outtextxy(600, 580, PrintBuffer);
+
+	//打印订单号
+	print_order_id(1170, 100, OrderID);
+	//打印订单信息
+	print_order_info(800, 150, OrderID);
+	//打印状况描述模块
+	print_description_info(800, 330, OrderID);
+	//打印质检反馈模块
+	print_quality_detail_info(800, 445, OrderID);
+
+	if (part_count == 0)
+	{
+		settextcolor(COLOR_GREY_2);
+		settextstyle(20, 0, FONT);
+		outtextxy(180, 185, "暂无相关数据！");
+		current_page = 0;
+		max_page = 0;
+	}
+	else
+	{
+		//先打印第一页
+		current_page = 1;
+		print_part_page_OrderCheckMENU(current_page, part_count, OrderID);
+		max_page = (int)((part_count - 1) / 10) + 1;
+	}
+	//先清空页码区域
+	setbkcolor(COLOR_WHITE);
+	clearrectangle(210, 500, 230, 520);
+	clearrectangle(240, 500, 260, 520);
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+	//显示当前页码
+	char page_buffer[8];
+	_stprintf(page_buffer, _T("%2d"), current_page);
+	outtextxy(210, 500, page_buffer);
+	_stprintf(page_buffer, _T("%d"), max_page);
+	outtextxy(240, 500, page_buffer);
+
+	//等待鼠标
+	int MENUchoice = OrderCheckMENU_MENUChoose();
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			return MENUchoice;
+		case 41:					//上一页
+			if (current_page != 1 && current_page != 0)
+			{
+				current_page--;
+				print_part_page_repair(current_page, part_count, OrderID);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				_stprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				_stprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = OrderCheckMENU_MENUChoose();
+			break;
+		case 42:					//下一页
+			if (current_page != max_page && current_page != 0)
+			{
+				current_page++;
+				print_part_page_repair(current_page, part_count, OrderID);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				_stprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				_stprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = OrderCheckMENU_MENUChoose();
+			break;
+		}
+	}
+}
+
+
 int RepairMENU()
 {
 	return 0;
@@ -20,19 +277,25 @@ int RepairMENU_MainMENU()
 
 	//打印背景
 	print_RepairMENU_MainMENU_background();
+	//加载图片
+	IMAGE Repair_Order_Page_BAR_0;
+	loadimage(&Repair_Order_Page_BAR_0, _T(".\\IMAGES\\Repair_Order_Page_BAR_0.png"), 450, 80);
+	IMAGE Repair_Order_Page_BAR_1;
+	loadimage(&Repair_Order_Page_BAR_1, _T(".\\IMAGES\\Repair_Order_Page_BAR_1.png"), 450, 80);
 
 	//MYsql的查询操作
 	static MYSQL_RES* res; //查询结果集
 	static MYSQL_ROW row;  //记录结构体
-	//查询数据
 	char query_str[512] = "";
+
+	//查询数据
 	sprintf(query_str, "SELECT count(*) FROM order_list WHERE RepairStaffID=%d;", UserID);
 	mysql_query(&mysql, query_str);
 	//获取结果集
 	res = mysql_store_result(&mysql);
 	row = mysql_fetch_row(res);
-	mysql_free_result(res);
 	count_all = atoi(row[0]);
+	mysql_free_result(res);
 
 	//打印摘要栏
 	print_repair_brief();
@@ -82,7 +345,7 @@ int RepairMENU_MainMENU()
 			if (current_page != 1 && current_page != 0)
 			{
 				current_page--;
-				print_order_page_repair(current_page, count_all,sort_flag);
+				print_order_page_repair(current_page, count_all, sort_flag);
 				//先清空页码区域
 				setbkcolor(COLOR_WHITE);
 				clearrectangle(210, 590, 230, 610);
@@ -117,24 +380,12 @@ int RepairMENU_MainMENU()
 			MENUchoice = RepairMENU_MainMENU_MENUChoose();
 			break;
 		case 43:
-			if (sort_flag == 0)
-			{
-				MENUchoice = RepairMENU_MainMENU_MENUChoose();
-				break;
-			}
-			else
+			if (sort_flag != 0)
 			{
 				sort_flag = 0;
-
-				IMAGE Repair_Order_Page_BAR_0;
-				loadimage(&Repair_Order_Page_BAR_0, _T(".\\IMAGES\\Repair_Order_Page_BAR_0.png"), 450, 80);
 				putimage(150, 560, &Repair_Order_Page_BAR_0);
 
-				//MYsql的查询操作
-				static MYSQL_RES* res; //查询结果集
-				static MYSQL_ROW row;  //记录结构体
 				//查询数据
-				char query_str[512] = "";
 				sprintf(query_str, "SELECT count(*) FROM order_list WHERE RepairStaffID=%d;", UserID);
 				mysql_query(&mysql, query_str);
 				//获取结果集
@@ -173,27 +424,16 @@ int RepairMENU_MainMENU()
 				outtextxy(210, 590, page_buffer);
 				_stprintf(page_buffer, _T("%d"), max_page);
 				outtextxy(240, 590, page_buffer);
-				break;
 			}
+			MENUchoice = RepairMENU_MainMENU_MENUChoose();
+			break;
 		case 44:
-			if (sort_flag == 1)
-			{
-				MENUchoice = RepairMENU_MainMENU_MENUChoose();
-				break;
-			}
-			else
+			if (sort_flag != 1)
 			{
 				sort_flag = 1;
-
-				IMAGE Repair_Order_Page_BAR_1;
-				loadimage(&Repair_Order_Page_BAR_1, _T(".\\IMAGES\\Repair_Order_Page_BAR_1.png"), 450, 80);
 				putimage(150, 560, &Repair_Order_Page_BAR_1);
 
-				//MYsql的查询操作
-				static MYSQL_RES* res; //查询结果集
-				static MYSQL_ROW row;  //记录结构体
 				//查询数据
-				char query_str[512] = "";
 				sprintf(query_str, "SELECT count(*) FROM order_list WHERE RepairStaffID=%d AND (Status=21 OR Status=22 OR Status=1);", UserID);
 				mysql_query(&mysql, query_str);
 				//获取结果集
@@ -232,9 +472,28 @@ int RepairMENU_MainMENU()
 				outtextxy(210, 590, page_buffer);
 				_stprintf(page_buffer, _T("%d"), max_page);
 				outtextxy(240, 590, page_buffer);
+			}
+			MENUchoice = RepairMENU_MainMENU_MENUChoose();
+			break;
+		case 90:
+			//重新显示本页信息
+			//打印背景
+			print_RepairMENU_MainMENU_background();
+			//打印消息栏
+			print_repair_brief();
+
+			if (sort_flag == 0)
+			{
+				sort_flag = 1;
+				MENUchoice = 43;
 				break;
 			}
-			//维修
+			else
+			{
+				sort_flag = 0;
+				MENUchoice = 44;
+				break;
+			}
 		case 101:
 		case 102:
 		case 103:
@@ -254,9 +513,6 @@ int RepairMENU_MainMENU()
 			if (row_clicked < count_all)
 			{
 				//当前行
-				char query_str[512] = "";
-				MYSQL_RES* res; //查询结果集
-				MYSQL_ROW row;  //记录结构体
 				//查询被点击的订单号
 				if (sort_flag == 0)
 				{
@@ -266,7 +522,7 @@ int RepairMENU_MainMENU()
 				{
 					sprintf(query_str, "SELECT Status,OrderID FROM order_list WHERE RepairStaffID=%d AND (Status=21 OR Status=22 OR Status=1) ORDER BY OrderID LIMIT %d,1;", UserID, row_clicked);
 				}
-				
+
 				mysql_query(&mysql, query_str);
 				//获取结果集
 				res = mysql_store_result(&mysql);
@@ -283,7 +539,7 @@ int RepairMENU_MainMENU()
 
 				MENUchoice = RepairMENU_RepairMENU(OrderID);
 				//上一级删除
-				//重现显示改订单维修页
+				//重新加载显示订单维修页
 				while (MENUchoice == 99)
 				{
 					MENUchoice = RepairMENU_RepairMENU(OrderID);
@@ -291,23 +547,8 @@ int RepairMENU_MainMENU()
 				//上一级返回
 				if (MENUchoice == 3)
 				{
-					//重新显示本页信息
-					//打印背景
-					print_RepairMENU_MainMENU_background();
-					//打印消息栏
-					print_repair_brief();
-					print_order_page_repair(current_page, count_all, sort_flag);
-					//先清空页码区域
-					setbkcolor(COLOR_WHITE);
-					clearrectangle(210, 590, 230, 610);
-					clearrectangle(240, 590, 260, 610);
-					settextcolor(BLACK);
-					settextstyle(20, 0, FONT);
-					//显示当前页码
-					_stprintf(page_buffer, _T("%2d"), current_page);
-					outtextxy(210, 590, page_buffer);
-					_stprintf(page_buffer, _T("%d"), max_page);
-					outtextxy(240, 590, page_buffer);
+					MENUchoice = 90;
+					break;
 				}
 			}
 			MENUchoice = RepairMENU_MainMENU_MENUChoose();
@@ -332,10 +573,6 @@ int RepairMENU_MainMENU()
 			if (row_clicked < count_all)
 			{
 				//当前行
-				char query_str[512] = "";
-				MYSQL_RES* res; //查询结果集
-				MYSQL_ROW row;  //记录结构体
-				//查询被点击的订单号
 				if (sort_flag == 0)
 				{
 					sprintf(query_str, "SELECT OrderID FROM order_list WHERE RepairStaffID=%d ORDER BY OrderID LIMIT %d,1;", UserID, row_clicked);
@@ -354,27 +591,16 @@ int RepairMENU_MainMENU()
 
 				MENUchoice = OrderCheckMENU(OrderID);
 
-				if (MENUchoice != 3)
+				if (MENUchoice == 3)
+				{
+					//返回，重新打印本页信息
+					MENUchoice = 90;
+					break;
+				}
+				else
 				{
 					break;
 				}
-				//重新显示本页信息
-				//打印背景
-				print_RepairMENU_MainMENU_background();
-				//打印消息栏
-				print_repair_brief();
-				print_order_page_repair(current_page, count_all, sort_flag);
-				//先清空页码区域
-				setbkcolor(COLOR_WHITE);
-				clearrectangle(210, 590, 230, 610);
-				clearrectangle(240, 590, 260, 610);
-				settextcolor(BLACK);
-				settextstyle(20, 0, FONT);
-				//显示当前页码
-				_stprintf(page_buffer, _T("%2d"), current_page);
-				outtextxy(210, 590, page_buffer);
-				_stprintf(page_buffer, _T("%d"), max_page);
-				outtextxy(240, 590, page_buffer);
 			}
 			MENUchoice = RepairMENU_MainMENU_MENUChoose();
 			break;
@@ -400,22 +626,22 @@ int RepairMENU_RepairMENU(int OrderID)
 	int repair_time = 0;
 
 	char input_buffer[256] = "";
-	int RepairPartID;			//维修零件编号
-	int id_RepairRecord;//维修记录编号
-	int repair_record_RepairPartID;//维修零件编号
-	int repair_record_part_number;//维修零件使用数量
+	int id_RepairRecord;			//维修记录编号
 	char part_name[60] = "";
-	int part_price;//维修零件价格
-	int storage_part_number;//维修零件库存
-	int storage_part_require;
-	int part_require;
+	int repair_record_RepairPartID;	//维修零件编号
+	int repair_record_num;	//维修零件使用数量
+	int part_price;					//维修零件价格
+	int storage_part_num;		//维修零件库存
+	int storage_part_req;
+	int add_RepairPartID;			//维修零件编号
+	int add_part_require;
 
 	//MYsql的查询操作
 	static MYSQL_RES* res; //查询结果集
 	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
 
 	//查询配件使用数量
-	char query_str[512] = "";
 	sprintf(query_str, "SELECT count(*) FROM repair_record WHERE OrderID=%d;", OrderID);
 	mysql_query(&mysql, query_str);
 	//获取结果集
@@ -582,9 +808,6 @@ int RepairMENU_RepairMENU(int OrderID)
 			if (row_clicked < count_all)
 			{
 				//当前行
-				char query_str[512] = "";
-				MYSQL_RES* res; //查询结果集
-				MYSQL_ROW row;  //记录结构体
 				//查询被点击的维修记录号
 				sprintf(query_str,
 					"SELECT \
@@ -600,9 +823,9 @@ int RepairMENU_RepairMENU(int OrderID)
 				row = mysql_fetch_row(res);
 				id_RepairRecord = atoi(row[0]);
 				repair_record_RepairPartID = atoi(row[1]);
-				repair_record_part_number = atoi(row[2]);
-				storage_part_number = atoi(row[3]);
-				storage_part_require = atoi(row[4]);
+				repair_record_num = atoi(row[2]);
+				storage_part_num = atoi(row[3]);
+				storage_part_req = atoi(row[4]);
 
 				mysql_free_result(res);
 
@@ -615,9 +838,8 @@ int RepairMENU_RepairMENU(int OrderID)
 				//更新零件库存信息
 				sprintf(query_str,
 					"UPDATE repair_part_storage SET Num = %d,Req=%d WHERE RepairPartID =%d"
-					, storage_part_number + repair_record_part_number, storage_part_require - repair_record_part_number, repair_record_RepairPartID);
+					, storage_part_num + repair_record_num, storage_part_req - repair_record_num, repair_record_RepairPartID);
 				mysql_query(&mysql, query_str);
-
 
 				return 99;
 			}
@@ -627,10 +849,6 @@ int RepairMENU_RepairMENU(int OrderID)
 			//添加配件
 			if (InputBox(input_buffer, 140, "请输入要添加的配件名称"))
 			{
-				//MYsql的查询操作
-				static MYSQL_RES* res; //查询结果集
-				static MYSQL_ROW row;  //记录结构体
-
 				sprintf(query_str, "SELECT RepairPartID,PartName,Num,Req FROM repair_part_storage WHERE PartName='%s';", input_buffer);
 				mysql_query(&mysql, query_str);
 				//获取结果集
@@ -646,15 +864,15 @@ int RepairMENU_RepairMENU(int OrderID)
 					return 99;
 				}
 				//保存相关数据
-				RepairPartID = atoi(row[0]);
+				add_RepairPartID = atoi(row[0]);
 				strcpy(part_name, row[1]);
-				storage_part_number = atoi(row[2]);
-				storage_part_require = atoi(row[3]);
+				storage_part_num = atoi(row[2]);
+				storage_part_req = atoi(row[3]);
 
 				while (InputBox(input_buffer, 4, "请输入添加配件的数量") == NULL);
-				part_require = atoi(input_buffer);
+				add_part_require = atoi(input_buffer);
 
-				if (part_require > storage_part_number)
+				if (add_part_require > storage_part_num)
 				{
 					//库存不足
 					//加载背景
@@ -686,16 +904,16 @@ int RepairMENU_RepairMENU(int OrderID)
 					return 99;
 				if (MENUchoice == 53)
 				{
-					if (part_require > storage_part_number)
+					if (add_part_require > storage_part_num)
 					{
-						sprintf(query_str, "UPDATE repair_part_storage SET Req = %d WHERE RepairPartID =%d", storage_part_require + part_require, RepairPartID);
+						sprintf(query_str, "UPDATE repair_part_storage SET Req = %d WHERE RepairPartID =%d", storage_part_req + add_part_require, add_RepairPartID);
 						mysql_query(&mysql, query_str);
 					}
 					else
 					{
-						sprintf(query_str, "UPDATE repair_part_storage SET Num = %d WHERE RepairPartID =%d", storage_part_number - part_require, RepairPartID);
+						sprintf(query_str, "UPDATE repair_part_storage SET Num = %d WHERE RepairPartID =%d", storage_part_num - add_part_require, add_RepairPartID);
 						mysql_query(&mysql, query_str);
-						sprintf(query_str, "INSERT INTO repair_record (OrderID, RepairPartID, Num) VALUES (%d,%d,%d)", OrderID, RepairPartID, part_require);
+						sprintf(query_str, "INSERT INTO repair_record (OrderID, RepairPartID, Num) VALUES (%d,%d,%d)", OrderID, add_RepairPartID, add_part_require);
 						mysql_query(&mysql, query_str);
 					}
 					return 99;
@@ -728,6 +946,580 @@ int RepairMENU_RepairMENU(int OrderID)
 			//	sprintf(query_str, "UPDATE order_list SET RepairDetail = %s WHERE OrderID =%d;",input_buffer, OrderID);
 			//	mysql_query(&mysql, query_str);
 			//}
+			//返回
+			return 3;
+		}
+	}
+}
+
+int QualityMENU_MainMENU()
+{
+	//质检员主页,显示订单信息
+	//获取订单数
+	int count_all;//订单总数
+	int count_finish;
+	int current_page = 0;
+	int max_page = 0;
+	//sort_flag=0,显示所有订单
+	//sort_flag=1,只显示当前身份订单
+	int sort_flag = 0;
+
+	//打印背景
+	print_QualityMENU_MainMENU_background();
+	//打印摘要栏
+	print_quality_brief();
+	//加载图片
+	IMAGE Quality_Order_Page_BAR_0;
+	loadimage(&Quality_Order_Page_BAR_0, _T(".\\IMAGES\\Quality_Order_Page_BAR_0.png"), 450, 80);
+	IMAGE Quality_Order_Page_BAR_1;
+	loadimage(&Quality_Order_Page_BAR_1, _T(".\\IMAGES\\Quality_Order_Page_BAR_1.png"), 450, 80);
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//查询数据
+	sprintf(query_str, "SELECT count(*) FROM order_list WHERE QualityStaffID=%d;", UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	mysql_free_result(res);
+	count_all = atoi(row[0]);
+
+
+	if (count_all == 0)
+	{
+		settextcolor(COLOR_GREY_2);
+		settextstyle(20, 0, FONT);
+		outtextxy(180, 185, "暂无相关数据！");
+		current_page = 0;
+		max_page = 0;
+	}
+	else
+	{
+		//先打印第一页
+		current_page = 1;
+		print_order_page_quality(current_page, count_all, sort_flag);
+		max_page = (int)((count_all - 1) / 13) + 1;
+	}
+	//先清空页码区域
+	setbkcolor(COLOR_WHITE);
+	clearrectangle(210, 590, 230, 610);
+	clearrectangle(240, 590, 260, 610);
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+	//显示当前页码
+	char page_buffer[8];
+	sprintf(page_buffer, _T("%2d"), current_page);
+	outtextxy(210, 590, page_buffer);
+	sprintf(page_buffer, _T("%d"), max_page);
+	outtextxy(240, 590, page_buffer);
+
+	//等待鼠标
+	int MENUchoice = QualityMENU_MainMENU_MENUChoose();
+	int row_clicked;
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+			return MENUchoice;
+		case 1:
+		case 2:
+			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			break;
+		case 41:					//上一页
+			if (current_page != 1 && current_page != 0)
+			{
+				current_page--;
+				print_order_page_quality(current_page, count_all, sort_flag);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 590, 230, 610);
+				clearrectangle(240, 590, 260, 610);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 590, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 590, page_buffer);
+			}
+			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			break;
+		case 42:					//下一页
+			if (current_page != max_page && current_page != 0)
+			{
+				current_page++;
+				print_order_page_quality(current_page, count_all, sort_flag);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 590, 230, 610);
+				clearrectangle(240, 590, 260, 610);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 590, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 590, page_buffer);
+			}
+			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			break;
+		case 43:
+			if (sort_flag == 0)
+			{
+				MENUchoice = QualityMENU_MainMENU_MENUChoose();
+				break;
+			}
+			else
+			{
+				sort_flag = 0;
+				putimage(150, 560, &Quality_Order_Page_BAR_0);
+
+				//查询数据
+				sprintf(query_str, "SELECT count(*) FROM order_list WHERE QualityStaffID=%d;", UserID);
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				mysql_free_result(res);
+				count_all = atoi(row[0]);
+
+				setbkcolor(COLOR_BG);
+				clearrectangle(180, 185, 780, 565);
+
+				if (count_all == 0)
+				{
+					settextcolor(COLOR_GREY_2);
+					settextstyle(20, 0, FONT);
+					outtextxy(180, 185, "暂无相关数据！");
+					current_page = 0;
+					max_page = 0;
+				}
+				else
+				{
+					//先打印第一页
+					current_page = 1;
+					print_order_page_quality(current_page, count_all, sort_flag);
+					max_page = (int)((count_all - 1) / 13) + 1;
+				}
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 590, 230, 610);
+				clearrectangle(240, 590, 260, 610);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 590, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 590, page_buffer);
+				break;
+			}
+		case 44:
+			if (sort_flag == 1)
+			{
+				MENUchoice = QualityMENU_MainMENU_MENUChoose();
+				break;
+			}
+			else
+			{
+				sort_flag = 1;
+				putimage(150, 560, &Quality_Order_Page_BAR_1);
+
+				//查询数据
+				sprintf(query_str,
+					"SELECT count(*) FROM order_list WHERE QualityStaffID=%d \
+					AND Status=3;", UserID);
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				mysql_free_result(res);
+				count_all = atoi(row[0]);
+
+				setbkcolor(COLOR_BG);
+				clearrectangle(180, 185, 780, 565);
+
+				if (count_all == 0)
+				{
+					settextcolor(COLOR_GREY_2);
+					settextstyle(20, 0, FONT);
+					outtextxy(180, 185, "暂无相关数据！");
+					current_page = 0;
+					max_page = 0;
+				}
+				else
+				{
+					//先打印第一页
+					current_page = 1;
+					print_order_page_quality(current_page, count_all, sort_flag);
+					max_page = (int)((count_all - 1) / 13) + 1;
+				}
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 590, 230, 610);
+				clearrectangle(240, 590, 260, 610);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 590, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 590, page_buffer);
+				break;
+			}
+		case 90:
+			//重新显示本页信息
+			//打印背景
+			print_QualityMENU_MainMENU_background();
+			//打印消息栏
+			print_quality_brief();
+
+			if (sort_flag == 0)
+			{
+				sort_flag = 1;
+				MENUchoice = 43;
+				break;
+			}
+			else
+			{
+				sort_flag = 0;
+				MENUchoice = 44;
+				break;
+			}
+			//质检
+		case 101:
+		case 102:
+		case 103:
+		case 104:
+		case 105:
+		case 106:
+		case 107:
+		case 108:
+		case 109:
+		case 110:
+		case 111:
+		case 112:
+		case 113:
+			//跳转到质检页面
+			//首先判断该页的订单数量
+			//当前点击行数（从0开始，整张表）
+			row_clicked = MENUchoice % 100 + 13 * (current_page - 1) - 1;
+			if (row_clicked < count_all)
+			{
+				//当前行
+				//查询被点击的订单号
+				if (sort_flag == 0)
+				{
+					sprintf(query_str,
+						"SELECT Status,OrderID FROM order_list \
+						WHERE QualityStaffID=%d ORDER BY OrderID LIMIT %d,1;"
+						, UserID, row_clicked);
+				}
+				else
+				{
+					sprintf(query_str,
+						"SELECT Status,OrderID FROM order_list \
+						WHERE QualityStaffID=%d AND Status=3 \
+						ORDER BY OrderID LIMIT %d,1;"
+						, UserID, row_clicked);
+				}
+
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				int order_status = atoi(row[0]);
+				int OrderID = atoi(row[1]);
+				//如果这个订单不处于质检状态
+				if (order_status != 3)
+				{
+					MENUchoice = QualityMENU_MainMENU_MENUChoose();
+					break;
+				}
+				mysql_free_result(res);
+
+				MENUchoice = QualityMENU_QualityMENU(OrderID);
+				//上一级返回
+				if (MENUchoice == 3)
+				{
+					MENUchoice = 90;
+					break;
+				}
+			}
+			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			break;
+			//查看
+		case 201:
+		case 202:
+		case 203:
+		case 204:
+		case 205:
+		case 206:
+		case 207:
+		case 208:
+		case 209:
+		case 210:
+		case 211:
+		case 212:
+		case 213:
+			//跳转到查看页面
+			//首先判断该页的订单数量
+			//当前点击行数（从0开始，整张表）
+			row_clicked = MENUchoice % 100 + 13 * (current_page - 1) - 1;
+			if (row_clicked < count_all)
+			{
+				//当前行
+				if (sort_flag == 0)
+				{
+					sprintf(query_str,
+						"SELECT OrderID FROM order_list \
+						WHERE QualityStaffID=%d ORDER BY OrderID LIMIT %d,1;"
+						, UserID, row_clicked);
+				}
+				else
+				{
+					sprintf(query_str,
+						"SELECT OrderID FROM order_list \
+						WHERE QualityStaffID=%d AND (Status=21 OR Status=22 OR Status=1) \
+						ORDER BY OrderID LIMIT %d,1;"
+						, UserID, row_clicked);
+				}
+
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				int OrderID = atoi(row[0]);
+				mysql_free_result(res);
+
+				MENUchoice = OrderCheckMENU(OrderID);
+
+				if (MENUchoice == 3)
+				{
+					//返回，重新打印本页信息
+					MENUchoice = 90;
+					break;
+				}
+				else
+				{
+					break;
+				}
+			}
+			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			break;
+		}
+	}
+	return 0;
+}
+
+int QualityMENU_QualityMENU(int OrderID)
+{
+	//打印背景
+	print_QualityMENU_QualityMENU_background();
+
+	//维修页,显示配件使用信息
+	//获取配件使用数
+	int count_all;//配件使用总数
+	int current_page = 0;
+	int max_page = 0;
+	//维修员和质检员姓名
+	char repair_staff_name[16] = "";
+	char quality_staff_name[16] = "";
+	char repair_time_buffer[16] = "";
+	int repair_time = 0;
+
+	char input_buffer[256] = "";
+	//本页图片
+	IMAGE Quality_Return_tip;
+	loadimage(&Quality_Return_tip, _T(".\\IMAGES\\Quality_Return_tip.png"), 300, 150);
+	IMAGE Quality_Finished_tip;
+	loadimage(&Quality_Finished_tip, _T(".\\IMAGES\\Quality_Finished_tip.png"), 300, 150);
+
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//查询配件使用数量
+	sprintf(query_str, "SELECT count(*) FROM repair_record WHERE OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	count_all = atoi(row[0]);
+
+	//查询维修员姓名
+	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.RepairStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+		strcpy(repair_staff_name, "无信息");
+	else
+		strcpy(repair_staff_name, row[0]);
+
+	//查询质检员姓名
+	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.QualityStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+		strcpy(quality_staff_name, "无信息");
+	else
+		strcpy(quality_staff_name, row[0]);
+
+	//查询工时
+	sprintf(query_str, "SELECT RepairTime FROM order_list WHERE order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+	{
+		strcpy(repair_time_buffer, "0");
+	}
+	else
+	{
+		strcpy(repair_time_buffer, row[0]);
+		repair_time = atoi(row[0]);
+	}
+
+	mysql_free_result(res);
+
+	//打印维修员和质检员信息
+	settextcolor(BLACK);
+	settextstyle(25, 0, FONT);
+	outtextxy(190, 580, repair_staff_name);
+	outtextxy(305, 580, quality_staff_name);
+	outtextxy(420, 580, repair_time_buffer);
+	//打印订单号
+	print_order_id(1170, 100, OrderID);
+	//打印订单信息
+	print_order_info(800, 150, OrderID);
+	//打印状况描述模块
+	print_description_info(800, 330, OrderID);
+	//打印质检反馈模块
+	print_quality_detail_info(800, 445, OrderID);
+
+	if (count_all == 0)
+	{
+		settextcolor(COLOR_GREY_2);
+		settextstyle(20, 0, FONT);
+		outtextxy(180, 185, "暂无相关数据！");
+		current_page = 0;
+		max_page = 0;
+	}
+	else
+	{
+		//先打印第一页
+		current_page = 1;
+		print_part_page_quality(current_page, count_all, OrderID);
+		max_page = (int)((count_all - 1) / 10) + 1;
+	}
+	//先清空页码区域
+	setbkcolor(COLOR_WHITE);
+	clearrectangle(210, 500, 230, 520);
+	clearrectangle(240, 500, 260, 520);
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+	//显示当前页码
+	char page_buffer[8];
+	_stprintf(page_buffer, _T("%2d"), current_page);
+	outtextxy(210, 500, page_buffer);
+	_stprintf(page_buffer, _T("%d"), max_page);
+	outtextxy(240, 500, page_buffer);
+
+	//等待鼠标
+	int MENUchoice = QualityMENU_QualityMENU_MENUChoose();
+	int row_clicked;				//当前行数（对应SQL中）
+
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+			return MENUchoice;
+		case 41:					//上一页
+			if (current_page != 1 && current_page != 0)
+			{
+				current_page--;
+				print_part_page_quality(current_page, count_all, OrderID);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				_stprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				_stprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = QualityMENU_QualityMENU_MENUChoose();
+			break;
+		case 42:					//下一页
+			if (current_page != max_page && current_page != 0)
+			{
+				current_page++;
+				print_part_page_quality(current_page, count_all, OrderID);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				char page_buffer[8];
+				_stprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				_stprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = QualityMENU_QualityMENU_MENUChoose();
+			break;
+		case 61:
+			//退回维修
+			sprintf(query_str, "UPDATE order_list SET Status = 22 WHERE OrderID =%d;", OrderID);
+			mysql_query(&mysql, query_str);
+
+			if (InputBox(input_buffer, 140, "140字符以内", "添加质检描述", 0, 0, true))
+			{
+				sprintf(query_str, "UPDATE order_list SET QualityDetail = '%s' WHERE OrderID =%d;", input_buffer, OrderID);
+				mysql_query(&mysql, query_str);
+			}
+
+			putimage(490, 285, &Quality_Return_tip);
+			Sleep(1500);
+			//返回
+			return 3;
+		case 62:
+			//通过质检
+			sprintf(query_str, "UPDATE order_list SET Status = 4 WHERE OrderID =%d;", OrderID);
+			mysql_query(&mysql, query_str);
+
+			if (InputBox(input_buffer, 140, "140字符以内", "添加质检描述", 0, 0, true))
+			{
+				sprintf(query_str, "UPDATE order_list SET QualityDetail = '%s' WHERE OrderID =%d;", input_buffer, OrderID);
+				mysql_query(&mysql, query_str);
+			}
+
+			putimage(490, 285, &Quality_Finished_tip);
+			Sleep(1500);
 			//返回
 			return 3;
 		}

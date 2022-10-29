@@ -1,191 +1,317 @@
 #pragma once
 #include "head.h"
-#include "Function.h"
 
-
-int OrderCheckMENU(int OrderID)
+//输入框（输入内容，长度限制，输入框横轴位置，输入框纵轴位置，默认显示的内容）
+int C_InputBox(char* Input, int Limit, int x, int y, const char* Default)
 {
-	//打印背景
-	print_OrderCheckMENU_background();
-
-	//维修页,显示配件使用信息
-	//获取配件使用数
-	int part_count;//配件使用总数
-	int current_page = 0;
-	int max_page = 0;
-	//维修员和质检员姓名
-	char repair_staff_name[16] = "";
-	char quality_staff_name[16] = "";
-	//工时
-	char repair_time[16] = "";
-	int part_price_total = calaulate_part_total_price(OrderID);
-	int time_price_total = 0;
-
-	char PrintBuffer[255];
-
-	//MYsql的查询操作
-	static MYSQL_RES* res; //查询结果集
-	static MYSQL_ROW row;  //记录结构体
-
-	//查询配件使用数量
-	char query_str[512] = "";
-	sprintf(query_str, "SELECT count(*) FROM repair_record WHERE OrderID=%d;", OrderID);
-	mysql_query(&mysql, query_str);
-	//获取结果集
-	res = mysql_store_result(&mysql);
-	row = mysql_fetch_row(res);
-	part_count = atoi(row[0]);
-
-	//查询维修员姓名
-	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.RepairStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
-	mysql_query(&mysql, query_str);
-	//获取结果集
-	res = mysql_store_result(&mysql);
-	row = mysql_fetch_row(res);
-	if (row == NULL)
-	{
-		strcpy(repair_staff_name, "无信息");
-	}
-	else
-	{
-		strcpy(repair_staff_name, row[0]);
-	}
-
-	//查询质检员姓名
-	sprintf(query_str, "SELECT user.Name FROM order_list,user WHERE order_list.QualityStaffID=user.UserID AND order_list.OrderID=%d;", OrderID);
-	mysql_query(&mysql, query_str);
-	//获取结果集
-	res = mysql_store_result(&mysql);
-	row = mysql_fetch_row(res);
-	if (row == NULL)
-	{
-		strcpy(quality_staff_name, "无信息");
-	}
-	else
-	{
-		strcpy(quality_staff_name, row[0]);
-	}
-	mysql_free_result(res);
-
-	//查询工时
-	sprintf(query_str, "SELECT RepairTime FROM order_list WHERE order_list.OrderID=%d;", OrderID);
-	mysql_query(&mysql, query_str);
-	//获取结果集
-	res = mysql_store_result(&mysql);
-	row = mysql_fetch_row(res);
-	if (row == NULL)
-	{
-		strcpy(repair_time, "0");
-	}
-	else
-	{
-		strcpy(repair_time, row[0]);
-	}
-	mysql_free_result(res);
-	time_price_total = atoi(repair_time) * tPRICE;
-
-	//打印维修员和质检员信息
+	clearrectangle(x, y, x + 120, y + 40);
+	fflush(stdin);//先清空输入缓存
+	char c;
+	int Length = 0;
+	char InputBuf[100] = { '\0' };
+	//MOUSEMSG m;
+	settextstyle(30, 0, FONT);
+	setlinecolor(BLACK);
+	line(x, y + 35, x + 120, y + 35);
+	settextcolor(RGB(220, 220, 220));
+	outtextxy(x + 1, y + 6, Default);
 	settextcolor(BLACK);
-	settextstyle(25, 0, FONT);
-	outtextxy(190, 580, repair_staff_name);
-	outtextxy(305, 580, quality_staff_name);
-	outtextxy(420, 580, repair_time);
-	sprintf(PrintBuffer, "%d", time_price_total);
-	outtextxy(510, 580, PrintBuffer);
-	sprintf(PrintBuffer, "%d", part_price_total);
-	outtextxy(600, 580, PrintBuffer);
-
-	//打印订单号
-	print_order_id(1170,100 , OrderID);
-	//打印订单信息
-	print_order_info(800, 150, OrderID);
-	//打印状况描述模块
-	print_description_info(800, 330, OrderID);
-	//打印质检反馈模块
-	print_quality_detail_info(800, 445, OrderID);
-
-	if (part_count == 0)
-	{
-		settextcolor(COLOR_GREY_2);
-		settextstyle(20, 0, FONT);
-		outtextxy(180, 185, "暂无相关数据！");
-		current_page = 0;
-		max_page = 0;
-	}
-	else
-	{
-		//先打印第一页
-		current_page = 1;
-		print_part_page_OrderCheckMENU(current_page, part_count, OrderID);
-		max_page = (int)((part_count-1) / 10) + 1;
-	}
-	//先清空页码区域
-	setbkcolor(COLOR_WHITE);
-	clearrectangle(210, 500, 230, 520);
-	clearrectangle(240, 500, 260, 520);
-	settextcolor(BLACK);
-	settextstyle(20, 0, FONT);
-	//显示当前页码
-	char page_buffer[8];
-	_stprintf(page_buffer, _T("%2d"), current_page);
-	outtextxy(210, 500, page_buffer);
-	_stprintf(page_buffer, _T("%d"), max_page);
-	outtextxy(240, 500, page_buffer);
-
-	//等待鼠标
-	int MENUchoice = OrderCheckMENU_MENUChoose();
+	FlushMouseMsgBuffer();
 	while (true)
 	{
-		switch (MENUchoice)
+		c = _getch();
+		if (c != 13)//如果输入的不是回车
 		{
-		case 0:
-		case 1:
-		case 2:
-		case 3:
-			return MENUchoice;
-		case 41:					//上一页
-			if (current_page != 1 && current_page != 0)
+			if (Length == 0)
 			{
-				current_page--;
-				print_part_page_repair(current_page, part_count, OrderID);
-				//先清空页码区域
-				setbkcolor(COLOR_WHITE);
-				clearrectangle(210, 500, 230, 520);
-				clearrectangle(240, 500, 260, 520);
-				settextcolor(BLACK);
-				settextstyle(20, 0, FONT);
-				//显示当前页码
-				char page_buffer[8];
-				_stprintf(page_buffer, _T("%2d"), current_page);
-				outtextxy(210, 500, page_buffer);
-				_stprintf(page_buffer, _T("%d"), max_page);
-				outtextxy(240, 500, page_buffer);
+				clearrectangle(x, y, x + 160, y + 34);
 			}
-			MENUchoice = OrderCheckMENU_MENUChoose();
-			break;
-		case 42:					//下一页
-			if (current_page != max_page && current_page != 0)
+			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z')
 			{
-				current_page++;
-				print_part_page_repair(current_page, part_count, OrderID);
-				//先清空页码区域
-				setbkcolor(COLOR_WHITE);
-				clearrectangle(210, 500, 230, 520);
-				clearrectangle(240, 500, 260, 520);
-				settextcolor(BLACK);
-				settextstyle(20, 0, FONT);
-				//显示当前页码
-				char page_buffer[8];
-				_stprintf(page_buffer, _T("%2d"), current_page);
-				outtextxy(210, 500, page_buffer);
-				_stprintf(page_buffer, _T("%d"), max_page);
-				outtextxy(240, 500, page_buffer);
+				if (Length == Limit - 1)
+				{
+					;
+				}
+				else
+				{
+					InputBuf[Length] = c;
+					InputBuf[Length + 1] = '\0';
+					outtextxy(x + 1 + 15 * Length, y + 6, c);
+					setlinecolor(RGB(0, 191, 255));
+					line(x + Length * 15, y + 35, x + 15 + Length * 15, y + 35);
+					Length++;
+				}
 			}
-			MENUchoice = OrderCheckMENU_MENUChoose();
-			break;
+			if (c == 8)
+			{
+				if (Length != 0)
+				{
+					InputBuf[Length] = '\0';
+					Length--;
+					clearrectangle(x + 15 * Length, y, x + 15 + 15 * Length, y + 34);
+					setlinecolor(BLACK);
+					line(x + Length * 15, y + 35, x + 15 + Length * 15, y + 35);
+				}
+			}
+		}
+		else
+		{
+			strcpy(Input, InputBuf);
+			return Length;
 		}
 	}
 }
+//输入框（输入内容，长度限制，输入框横轴位置，输入框纵轴位置，输入框总长度，字体高度，默认显示的内容）
+int C_InputBox(char* Input, int Limit, int x, int y, int Lsize, int Hsize, const char* Default)
+{
+	clearrectangle(x, y, x + Lsize, y + Hsize);
+	fflush(stdin);//先清空输入缓存
+	char c;
+	int Length = 0;
+	char InputBuf[100] = { '\0' };
+	//MOUSEMSG m;
+	settextstyle(Hsize, 0, FONT);
+	setlinecolor(BLACK);
+	for (int i = x; i < x + Lsize; i++)
+	{
+		line(i, y + Hsize + 2, i + 1, y + Hsize + 2);
+		//Sleep(1);
+	}
+	settextcolor(RGB(220, 220, 220));
+	outtextxy(x, y, Default);
+	settextcolor(BLACK);
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		//while (MouseHit())//如果鼠标被按下，则退出输入
+		//{
+		//	m = GetMouseMsg();
+		//	if (m.uMsg == WM_LBUTTONDOWN)
+		//	{
+		//		strcpy(Input, InputBuf);
+		//		return Length;
+		//	}
+		//}
+		c = _getch();
+		if (c != 13)//如果输入的不是回车
+		{
+			if (Length == 0)
+			{
+				clearrectangle(x, y, x + Lsize, y + Hsize);
+				settextcolor(RGB(220, 220, 220));
+				outtextxy(x, y, Default);
+				settextcolor(BLACK);
+			}
+			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '.' || c == '\\' || c == '/' || c == '_' || c == ':' || c == '-')
+			{
+				if (Length == Limit)
+				{
+					;
+				}
+				else
+				{
+					if (Length == 0)//第一个字符
+					{
+						clearrectangle(x, y, x + Lsize, y + Hsize);
+					}
+					InputBuf[Length] = c;
+					InputBuf[Length + 1] = '\0';
+					outtextxy(x + (Hsize / 2) * Length, y, c);
+					setlinecolor(RGB(0, 191, 255));
+					line(x + Length * (Hsize / 2), y + Hsize + 2, x + (Length + 1) * (Hsize / 2), y + Hsize + 2);
+					Length++;
+				}
+			}
+			if (c == 8)
+			{
+				if (Length != 0)
+				{
+					InputBuf[Length] = '\0';
+					Length--;
+					clearrectangle(x + Length * (Hsize / 2), y, x + (Length + 1) * (Hsize / 2), y + Hsize);
+					setlinecolor(BLACK);
+					line(x + Length * (Hsize / 2), y + Hsize + 2, x + (Length + 1) * (Hsize / 2), y + Hsize + 2);
+				}
+			}
+		}
+		else
+		{
+			strcpy(Input, InputBuf);
+			return Length;
+		}
+	}
+}
+//输入框_登录界面（输入内容，长度限制，输入框横轴位置，输入框纵轴位置，输入框总长度，字体高度，默认显示的内容）
+int CR_InputBox(char* Input, int Limit, int x, int y, int Lsize, int Hsize, const char* Default)
+{
+	clearrectangle(x, y, x + Lsize, y + Hsize + 2);
+	fflush(stdin);//先清空输入缓存
+	char c;
+	int Length = 0;
+	char InputBuf[100] = { '\0' };
+	//MOUSEMSG m;
+	settextstyle(Hsize, 0, FONT);
+	setlinecolor(BLACK);
+	for (int i = x; i < x + Lsize; i++)
+	{
+		line(i, y + Hsize, i + 1, y + Hsize);
+		//Sleep(1);
+	}
+	settextcolor(RGB(220, 220, 220));
+	outtextxy(x, y, Default);
+	settextcolor(BLACK);
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		c = _getch();
+		if (c != 13)//如果输入的不是回车
+		{
+			if (Length == 0)
+			{
+				clearrectangle(x, y, x + Lsize, y + Hsize);
+				settextcolor(RGB(220, 220, 220));
+				outtextxy(x, y, Default);
+				settextcolor(BLACK);
+			}
+			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '.' || c == '\\' || c == '/' || c == '_' || c == ':' || c == '-')
+			{
+				if (Length == Limit)
+				{
+					;
+				}
+				else
+				{
+					if (Length == 0)//第一个字符
+					{
+						clearrectangle(x, y, x + Lsize, y + Hsize);
+					}
+					InputBuf[Length] = c;
+					InputBuf[Length + 1] = '\0';
+					outtextxy(x + (Hsize / 2) * Length, y, c);
+					setlinecolor(RGB(0, 191, 255));
+					line(x + Length * (Hsize / 2), y + Hsize, x + (Length + 1) * (Hsize / 2), y + Hsize);
+					Length++;
+				}
+			}
+			if (c == 8)
+			{
+				if (Length != 0)
+				{
+					InputBuf[Length] = '\0';
+					Length--;
+					clearrectangle(x + Length * (Hsize / 2), y, x + (Length + 1) * (Hsize / 2), y + Hsize);
+					setlinecolor(BLACK);
+					line(x + Length * (Hsize / 2), y + Hsize, x + (Length + 1) * (Hsize / 2), y + Hsize);
+				}
+			}
+		}
+		else
+		{
+			strcpy(Input, InputBuf);
+			return Length;
+		}
+	}
+}
+//输入框_不显示字符_登录界面（输入内容，长度限制，输入框横轴位置，输入框纵轴位置，输入框总长度，字体高度，默认显示的内容）
+int CHR_InputBox(char* Input, int Limit, int x, int y, int Lsize, int Hsize, const char* Default)
+{
+	clearrectangle(x, y, x + Lsize, y + Hsize + 2);
+	fflush(stdin);//先清空输入缓存
+	char c;
+	int Length = 0;
+	char InputBuf[100] = { '\0' };
+	//MOUSEMSG m;
+	settextstyle(Hsize, 0, FONT);
+	setlinecolor(BLACK);
+	for (int i = x; i < x + Lsize; i++)
+	{
+		line(i, y + Hsize, i + 1, y + Hsize);
+		//Sleep(1);
+	}
+	settextcolor(RGB(220, 220, 220));
+	outtextxy(x, y, Default);
+	settextcolor(BLACK);
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		c = _getch();
+		if (c != 13)//如果输入的不是回车
+		{
+			if (Length == 0)
+			{
+				clearrectangle(x, y, x + Lsize, y + Hsize);
+				settextcolor(RGB(220, 220, 220));
+				outtextxy(x, y, Default);
+				settextcolor(BLACK);
+			}
+			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '.' || c == '\\' || c == '/' || c == '_' || c == ':' || c == '-')
+			{
+				if (Length == Limit)
+				{
+					;
+				}
+				else
+				{
+					if (Length == 0)//第一个字符
+					{
+						clearrectangle(x, y, x + Lsize, y + Hsize);
+					}
+					InputBuf[Length] = c;
+					InputBuf[Length + 1] = '\0';
+					outtextxy(x + (Hsize / 2) * Length, y, '*');
+					setlinecolor(RGB(0, 191, 255));
+					line(x + Length * (Hsize / 2), y + Hsize, x + (Length + 1) * (Hsize / 2), y + Hsize);
+					Length++;
+				}
+			}
+			if (c == 8)
+			{
+				if (Length != 0)
+				{
+					InputBuf[Length] = '\0';
+					Length--;
+					clearrectangle(x + Length * (Hsize / 2), y, x + (Length + 1) * (Hsize / 2), y + Hsize);
+					setlinecolor(BLACK);
+					line(x + Length * (Hsize / 2), y + Hsize, x + (Length + 1) * (Hsize / 2), y + Hsize);
+				}
+			}
+		}
+		else
+		{
+			strcpy(Input, InputBuf);
+			return Length;
+		}
+	}
+}
+
+int CheckID(char* input_UserName, char* input_PassWord)
+{
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//查询数据
+	sprintf(query_str,
+		"SELECT UserID,Role FROM user \
+		WHERE UserName='%s' \
+		AND PassWord='%s';"
+		, input_UserName, input_PassWord);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	if (row == NULL)
+	{
+		return -1;
+	}
+	else
+	{
+		UserID = atoi(row[0]);
+		return atoi(row[1]);
+	}
+}
+
 
 int calaulate_part_total_price(int OrderID)
 {

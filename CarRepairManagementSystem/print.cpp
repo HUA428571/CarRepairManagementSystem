@@ -12,6 +12,17 @@ void print_RepairMENU_MainMENU_background()
 	putimage(0, 0, &BG);
 	return;
 }
+void print_QualityMENU_MainMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\QualityMENU_Home.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+
 
 void print_RepairMENU_RepairMENU_background()
 {
@@ -23,6 +34,17 @@ void print_RepairMENU_RepairMENU_background()
 	putimage(0, 0, &BG);
 	return;
 }
+void print_QualityMENU_QualityMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\QualityMENU_Quality.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+
 
 void print_OrderCheckMENU_background()
 {
@@ -89,8 +111,19 @@ void print_repair_brief()
 	//获取结果集
 	res = mysql_store_result(&mysql);
 	row = mysql_fetch_row(res);
-	outtextxy(985, 185, row[0]);
 	my_order = atoi(row[0]);
+
+	//此人没有订单数据
+	if (my_order == 0)
+	{
+		outtextxy(985, 185, "无数据");
+		outtextxy(985, 215, "无数据");
+		outtextxy(985, 245, "无数据");
+		outtextxy(985, 275, "无数据");
+		outtextxy(855, 415, "无数据");
+		return;
+	}
+	outtextxy(985, 185, row[0]);
 
 	//总订单
 	sprintf(query_str, "SELECT count(*) FROM order_list;");
@@ -115,7 +148,6 @@ void print_repair_brief()
 	res = mysql_store_result(&mysql);
 	row = mysql_fetch_row(res);
 	outtextxy(985, 275, row[0]);
-	outtextxy(985, 385, row[0]);
 	my_order_finish = atoi(row[0]);
 
 	mysql_free_result(res);
@@ -133,6 +165,120 @@ void print_repair_brief()
 
 	return;
 }
+void print_quality_brief()
+{
+	IMAGE TodayInfo_Quality;
+	loadimage(&TodayInfo_Quality, _T(".\\IMAGES\\TodayInfo_Quality.png"), 440, 580);
+	putimage(790, 70, &TodayInfo_Quality);
+
+	int my_order, my_order_quality,my_order_finish;
+	char print_buffer[64]="";
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//显示当前用户信息
+	char buffer_print_role[45] = "";
+	//查询数据
+	sprintf(query_str, "SELECT Name,Role FROM user WHERE UserID=%d;", UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	MatchRole(atoi(row[1]), buffer_print_role);
+
+	settextcolor(COLOR_GREY_2);
+	settextstyle(18, 0, FONT);
+	outtextxy(1080, 82, buffer_print_role);
+	int username_length = strlen(row[0]);
+	settextcolor(BLACK);
+	settextstyle(30, 0, FONT);
+	outtextxy(1170 - username_length * 15, 100, row[0]);
+	mysql_free_result(res);
+
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+
+	//我的订单
+	sprintf(query_str, "SELECT count(*) FROM order_list WHERE QualityStaffID=%d;", UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	my_order = atoi(row[0]);
+	//此人没有订单数据
+	if (my_order == 0)
+	{
+		outtextxy(985, 185, "无数据");
+		outtextxy(985, 215, "无数据");
+		outtextxy(985, 245, "无数据");
+		outtextxy(985, 275, "无数据");
+		outtextxy(855, 415, "无数据");
+		return;
+	}
+	outtextxy(985, 185, row[0]);
+
+	//总订单
+	sprintf(query_str, "SELECT count(*) FROM order_list;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 215, row[0]);
+
+	//待质检
+	sprintf(query_str, 
+		"SELECT count(*) FROM order_list \
+		WHERE QualityStaffID=%d AND Status=3;", UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 245, row[0]);
+	my_order_quality = atoi(row[0]);
+
+	//已质检
+	sprintf(query_str, 
+		"SELECT count(*) FROM order_list \
+		WHERE QualityStaffID=%d \
+		AND(Status=4 OR Status=5);"
+		, UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 275, row[0]);
+	my_order_finish = atoi(row[0]);
+	my_order_quality += my_order_finish;
+
+	mysql_free_result(res);
+
+	//进度条
+	setlinestyle(PS_NULL);
+	setfillcolor(COLOR_GREY_3);
+	fillrectangle(855, 415, 855 + 310, 415 + 20);
+	if (my_order_quality == 0)
+	{
+		outtextxy(985, 385, "0");
+		return;
+	}
+	else
+	{
+		sprintf(print_buffer, "%d", my_order_quality);
+		outtextxy(985, 385, print_buffer);
+	}
+	setfillcolor(COLOR_RED);
+	float finfish = (float)my_order_finish / my_order_quality;
+	fillrectangle(855, 415, 855 + 310 * finfish, 415 + 20);
+	char finish_buffer[8];
+	sprintf(finish_buffer, "%3d%%", 100 * my_order_finish / my_order_quality);
+	outtextxy(1125, 385, finish_buffer);
+
+	return;
+}
+
 
 void print_order_info(int x, int y, int OrderID)
 {
@@ -332,6 +478,58 @@ void print_order_page_repair(int page, int count,int status)
 	}
 	return;
 }
+void print_order_page_quality(int page, int count, int status)
+{
+	//本函数限定订单的状态为 status
+	//下标都从0开始（方便sql查询）
+	int print_row = 13 * (page - 1);
+
+	char query_str[512] = "";
+	//显示定位
+	int x = 180, y = 185;
+	//首先清空显示区域
+	setbkcolor(COLOR_BG);
+	clearrectangle(180, 185, 780, 565);
+	settextstyle(20, 0, FONT);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	for (int i = 0; (i < 13) && (print_row < count); i++)
+	{
+		//查询数据
+		if (status == 0)
+		{
+			sprintf(query_str, "SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+WHERE QualityStaffID=%d ORDER BY OrderID LIMIT %d,1;", UserID, print_row);
+		}
+		else
+		{
+			sprintf(query_str, "SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+WHERE QualityStaffID=%d AND Status=3 ORDER BY OrderID LIMIT %d,1;", UserID, print_row);
+		}
+		mysql_query(&mysql, query_str);
+		//获取结果集
+		res = mysql_store_result(&mysql);
+		row = mysql_fetch_row(res);
+
+		print_order_rol(x, y + i * 30, row);
+
+		int status = atoi(row[1]);
+		if (status ==3)
+		{
+			settextcolor(COLOR_ORANGE);
+			outtextxy(x + 500, y + i * 30, "质检");//质检
+		}
+		settextcolor(COLOR_GREEN);
+		outtextxy(x + 555, y + i * 30, "查看");//查看
+
+		mysql_free_result(res);
+
+		print_row++;
+	}
+	return;
+}
 
 void print_order_rol(int x, int y, MYSQL_ROW row)
 {
@@ -348,6 +546,7 @@ void print_order_rol(int x, int y, MYSQL_ROW row)
 
 	return;
 }
+
 
 int print_part_page_repair(int page, int count, int OrderID)
 {
@@ -395,6 +594,60 @@ AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, pr
 	}
 	return price_total;
 }
+int print_part_page_quality(int page, int count, int OrderID)
+{
+	//下标都从0开始（方便sql查询）
+	int print_row = 10 * (page - 1);
+	int price_total = 0;
+
+	//显示定位
+	int x = 180, y = 185;
+	//首先清空显示区域
+	setbkcolor(COLOR_BG);
+	clearrectangle(180, 185, 180 + 550, 185 + 290);
+	settextstyle(20, 0, FONT);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	for (int i = 0; (i < 10) && (print_row < count); i++)
+	{
+		//查询数据
+		sprintf(query_str,
+			"SELECT \
+repair_record.id_RepairRecord, \
+repair_part_storage.PartName, \
+repair_part_storage.Price, \
+repair_record.Num \
+FROM repair_record,repair_part_storage \
+WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+
+		mysql_query(&mysql, query_str);
+		//获取结果集
+		res = mysql_store_result(&mysql);
+		row = mysql_fetch_row(res);
+
+		price_total += print_part_rol(x, y + i * 30, row);
+
+		mysql_free_result(res);
+		print_row++;
+	}
+	return price_total;
+}
+
+int print_part_rol(int x, int y, MYSQL_ROW row)
+{
+	settextcolor(COLOR_GREY_2);
+	outtextxy(x, y, row[0]);//编号
+	outtextxy(x + 90, y, row[1]);//名称
+	outtextxy(x + 350, y, row[2]);//单价
+	outtextxy(x + 440, y, row[3]);//件数
+	return atoi(row[2]);
+}
+
 
 int print_part_page_OrderCheckMENU(int page, int count, int OrderID)
 {
@@ -439,13 +692,4 @@ AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, pr
 	return price_total;
 }
 
-int print_part_rol(int x, int y, MYSQL_ROW row)
-{
-	settextcolor(COLOR_GREY_2);
-	outtextxy(x, y, row[0]);//编号
-	outtextxy(x + 90, y, row[1]);//名称
-	outtextxy(x + 350, y, row[2]);//单价
-	outtextxy(x + 440, y, row[3]);//件数
-	return atoi(row[2]);
-}
 

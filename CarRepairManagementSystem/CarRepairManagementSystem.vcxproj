@@ -147,7 +147,7 @@
     <ClCompile Include="Match.cpp" />
     <ClCompile Include="MENUchoose.cpp" />
     <ClCompile Include="print.cpp" />
-    <ClCompile Include="RepairMENU.cpp" />
+    <ClCompile Include="MENU.cpp" />
     <ClCompile Include="UI_Test.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,7 +156,7 @@
     <ClInclude Include="Match.h" />
     <ClInclude Include="MENUchoose.h" />
     <ClInclude Include="print.h" />
-    <ClInclude Include="RepairMENU.h" />
+    <ClInclude Include="MENU.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

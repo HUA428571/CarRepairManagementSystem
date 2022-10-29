@@ -41,13 +41,50 @@ int main()
 
 
 
-	UserID = 23;
+	//UserID = 34;
 	//Role = 2;
 	//strcpy(UserName, "B19030314");
 
 	//RepairMENU();
-	RepairMENU_MainMENU();
-	
-	mysql_close(&mysql);
-	return 0;
+	//RepairMENU_MainMENU();
+
+	int MENUchoice = startMENU();
+
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+			//³ÌÐò½áÊø
+			mysql_close(&mysql);
+
+			return 0;
+		case 1:
+			MENUchoice = startMENU();
+			break;
+		case 100:
+
+			MENUchoice = 1;
+			break;
+		case 101:
+
+			MENUchoice = 1;
+			break;
+		case 102:
+			RepairMENU_MainMENU();
+			MENUchoice = 1;
+			break;
+		case 103:
+			QualityMENU_MainMENU();
+			break;
+		case 104:
+
+			MENUchoice = 1;
+			break;
+		case 105:
+
+			MENUchoice = 1;
+			break;
+		}
+	}
 }

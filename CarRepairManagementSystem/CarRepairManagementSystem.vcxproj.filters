@@ -18,7 +18,7 @@
     <ClCompile Include="UI_Test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="RepairMENU.cpp">
+    <ClCompile Include="MENU.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Match.cpp">
@@ -38,7 +38,7 @@
     <ClInclude Include="head.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="RepairMENU.h">
+    <ClInclude Include="MENU.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Match.h">
