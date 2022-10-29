@@ -43,7 +43,7 @@ int startMENU()
 		case 1:
 			putimage(0, 0, &BG);
 			putimage(470, 290, &UserNameBox);
-			CR_InputBox(buffer_UserName, 40, 530, 310, 270, 30, "");
+			InputBox_show(buffer_UserName, 40, 530, 310, 270, 30, "");
 			setlinecolor(BLACK);
 			line(530, 340, 800, 340);
 			UserNameCheck = 1;
@@ -51,7 +51,7 @@ int startMENU()
 			break;
 		case 2:
 			putimage(470, 370, &PassWordBox);
-			CHR_InputBox(PassWord, 40, 530, 390, 270, 30, "");
+			InputBox_no_show(PassWord, 40, 530, 390, 270, 30, "");
 			setlinecolor(BLACK);
 			line(530, 420, 800, 420);
 			if (UserNameCheck == 0)
@@ -75,17 +75,16 @@ int startMENU()
 		case 61:
 			return 0;
 		case 62:
-			clearrectangle(124, 644, 124 + 132, 644 + 22);
-			CR_InputBox(buffer_input_OrderID, 10, 124, 644, 132, 22, "请输入订单号");
+			clearrectangle(236, 644, 124 + 132, 644 + 22);
+			InputBox_show(buffer_input_OrderID, 10, 236, 644, 132, 22, "请输入订单号");
 			OrderID = atoi(buffer_input_OrderID);
 			//查询订单状态
 			sprintf(query_str, "SELECT Status FROM order_list WHERE OrderID=%s;", buffer_input_OrderID);
 			mysql_query(&mysql, query_str);
 			//获取结果集
 			res = mysql_store_result(&mysql);
-			row = mysql_fetch_row(res);
 			//没有找到相应的订单
-			if (row == NULL)
+			if (res == NULL)
 			{
 				IMAGE No_Order_fault;
 				loadimage(&No_Order_fault, _T(".\\IMAGES\\No_Order_fault.png"), 300, 150);
@@ -93,6 +92,7 @@ int startMENU()
 				Sleep(1500);
 				return 1;
 			}
+			row = mysql_fetch_row(res);
 			Status = atoi(row[0]);
 			if (Status == 4)
 			{
@@ -107,13 +107,12 @@ int startMENU()
 	}
 }
 
-
 int OrderCheckMENU(int OrderID)
 {
 	//打印背景
 	print_OrderCheckMENU_background();
 	RECT print_rect;
-	int x, y,w,h;
+	int x, y, w, h;
 
 	//维修页,显示配件使用信息
 	//获取配件使用数
@@ -231,7 +230,7 @@ int OrderCheckMENU(int OrderID)
 	//打印状况描述模块
 	print_description_info(800, 330, OrderID);
 	//打印质检反馈模块
-	print_quality_detail_info(800, 445, OrderID);
+	print_quality_detail_info(800, 479, OrderID);
 
 	if (part_count == 0)
 	{
@@ -315,8 +314,7 @@ int OrderCheckMENU(int OrderID)
 		}
 	}
 }
-
-int OrderCheckMenu_Visiter_Payed(int Status,int OrderID)
+int OrderCheckMenu_Visiter_Payed(int Status, int OrderID)
 {
 	//打印背景
 	print_OrderCheckMenu_Visiter_Payed_background();
@@ -440,7 +438,7 @@ int OrderCheckMenu_Visiter_Payed(int Status,int OrderID)
 	x = 833;
 	//费用总计
 	print_rect = { x, y, x + w, y + h };
-	sprintf(PrintBuffer, "%d", part_price_total+ time_price_total);
+	sprintf(PrintBuffer, "%d", part_price_total + time_price_total);
 	drawtext(PrintBuffer, &print_rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 	x = 976;
@@ -448,7 +446,7 @@ int OrderCheckMenu_Visiter_Payed(int Status,int OrderID)
 	print_rect = { x, y, x + w, y + h };
 	if (Status == 5)
 	{
-	drawtext(PrintBuffer, &print_rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+		drawtext(PrintBuffer, &print_rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	}
 	else
 	{
@@ -542,7 +540,6 @@ int OrderCheckMenu_Visiter_Payed(int Status,int OrderID)
 		}
 	}
 }
-
 int OrderCheckMenu_Visiter_UnPay(int Status, int OrderID)
 {
 	//打印背景
@@ -773,13 +770,6 @@ int OrderCheckMenu_Visiter_UnPay(int Status, int OrderID)
 			return 3;
 		}
 	}
-}
-
-
-
-int RepairMENU()
-{
-	return 0;
 }
 
 int RepairMENU_MainMENU()
@@ -1112,9 +1102,23 @@ int RepairMENU_MainMENU()
 
 				if (MENUchoice == 3)
 				{
-					//返回，重新打印本页信息
-					MENUchoice = 90;
-					break;
+					//重新打印本页
+					//打印背景
+					print_RepairMENU_MainMENU_background();
+					//打印消息栏
+					print_repair_brief();
+					print_order_page_repair(current_page, count_all, sort_flag);
+					//先清空页码区域
+					setbkcolor(COLOR_WHITE);
+					clearrectangle(210, 590, 230, 610);
+					clearrectangle(240, 590, 260, 610);
+					settextcolor(BLACK);
+					settextstyle(20, 0, FONT);
+					//显示当前页码
+					_stprintf(page_buffer, _T("%2d"), current_page);
+					outtextxy(210, 590, page_buffer);
+					_stprintf(page_buffer, _T("%d"), max_page);
+					outtextxy(240, 590, page_buffer);
 				}
 				else
 				{
@@ -1127,7 +1131,6 @@ int RepairMENU_MainMENU()
 	}
 	return 0;
 }
-
 int RepairMENU_RepairMENU(int OrderID)
 {
 	//打印背景
@@ -1229,7 +1232,7 @@ int RepairMENU_RepairMENU(int OrderID)
 	//打印状况描述模块
 	print_description_info(800, 330, OrderID);
 	//打印质检反馈模块
-	print_quality_detail_info(800, 445, OrderID);
+	print_quality_detail_info(800, 470, OrderID);
 
 	if (count_all == 0)
 	{
@@ -1637,6 +1640,8 @@ int QualityMENU_MainMENU()
 				outtextxy(210, 590, page_buffer);
 				sprintf(page_buffer, _T("%d"), max_page);
 				outtextxy(240, 590, page_buffer);
+
+				MENUchoice = QualityMENU_MainMENU_MENUChoose();
 				break;
 			}
 		case 44:
@@ -1691,6 +1696,8 @@ int QualityMENU_MainMENU()
 				outtextxy(210, 590, page_buffer);
 				sprintf(page_buffer, _T("%d"), max_page);
 				outtextxy(240, 590, page_buffer);
+
+				MENUchoice = QualityMENU_MainMENU_MENUChoose();
 				break;
 			}
 		case 90:
@@ -1822,9 +1829,23 @@ int QualityMENU_MainMENU()
 
 				if (MENUchoice == 3)
 				{
-					//返回，重新打印本页信息
-					MENUchoice = 90;
-					break;
+					//重新显示本页信息
+					//打印背景
+					print_QualityMENU_MainMENU_background();
+					//打印消息栏
+					print_quality_brief();
+					print_order_page_quality(current_page, count_all, sort_flag);
+					//先清空页码区域
+					setbkcolor(COLOR_WHITE);
+					clearrectangle(210, 590, 230, 610);
+					clearrectangle(240, 590, 260, 610);
+					settextcolor(BLACK);
+					settextstyle(20, 0, FONT);
+					//显示当前页码
+					sprintf(page_buffer, _T("%2d"), current_page);
+					outtextxy(210, 590, page_buffer);
+					sprintf(page_buffer, _T("%d"), max_page);
+					outtextxy(240, 590, page_buffer);
 				}
 				else
 				{
@@ -1837,7 +1858,6 @@ int QualityMENU_MainMENU()
 	}
 	return 0;
 }
-
 int QualityMENU_QualityMENU(int OrderID)
 {
 	//打印背景
@@ -1928,7 +1948,7 @@ int QualityMENU_QualityMENU(int OrderID)
 	//打印状况描述模块
 	print_description_info(800, 330, OrderID);
 	//打印质检反馈模块
-	print_quality_detail_info(800, 445, OrderID);
+	print_quality_detail_info(800, 470, OrderID);
 
 	if (count_all == 0)
 	{
@@ -2016,7 +2036,7 @@ int QualityMENU_QualityMENU(int OrderID)
 			sprintf(query_str, "UPDATE order_list SET Status = 22 WHERE OrderID =%d;", OrderID);
 			mysql_query(&mysql, query_str);
 
-			if (InputBox(input_buffer, 140, "140字符以内", "添加质检描述", 0, 0, true))
+			if (InputBox(input_buffer, 52, "50字符以内", "添加质检描述", "质检退回维修", 350, 120, true))
 			{
 				sprintf(query_str, "UPDATE order_list SET QualityDetail = '%s' WHERE OrderID =%d;", input_buffer, OrderID);
 				mysql_query(&mysql, query_str);
@@ -2031,7 +2051,7 @@ int QualityMENU_QualityMENU(int OrderID)
 			sprintf(query_str, "UPDATE order_list SET Status = 4 WHERE OrderID =%d;", OrderID);
 			mysql_query(&mysql, query_str);
 
-			if (InputBox(input_buffer, 140, "140字符以内", "添加质检描述", 0, 0, true))
+			if (InputBox(input_buffer, 52, "50字符以内", "添加质检描述", "质检通过", 350, 120, true))
 			{
 				sprintf(query_str, "UPDATE order_list SET QualityDetail = '%s' WHERE OrderID =%d;", input_buffer, OrderID);
 				mysql_query(&mysql, query_str);

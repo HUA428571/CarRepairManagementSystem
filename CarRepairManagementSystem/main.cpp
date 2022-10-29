@@ -3,13 +3,6 @@
 
 MYSQL mysql;
 int UserID;
-//char UserName[46]="";
-//int Role;
-
-//MYsql的查询操作
-//MYSQL_RES* res; //查询结果集
-//MYSQL_ROW row;  //记录结构体
-
 
 int main()
 {
@@ -35,21 +28,7 @@ int main()
 	format.lfPitchAndFamily = FIXED_PITCH;
 	settextstyle(&format);						// 设置字体样式
 
-
-
-
-
-
-
-	//UserID = 34;
-	//Role = 2;
-	//strcpy(UserName, "B19030314");
-
-	//RepairMENU();
-	//RepairMENU_MainMENU();
-
 	int MENUchoice = startMENU();
-
 	while (true)
 	{
 		switch (MENUchoice)

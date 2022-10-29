@@ -148,7 +148,7 @@
     <ClCompile Include="MENUchoose.cpp" />
     <ClCompile Include="print.cpp" />
     <ClCompile Include="MENU.cpp" />
-    <ClCompile Include="UI_Test.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Function.h" />

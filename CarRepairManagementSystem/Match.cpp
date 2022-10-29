@@ -1,13 +1,13 @@
 #pragma once
 #include "head.h"
 
-//匹配状态（状态代码，输出字符串）
+//匹配订单状态（状态代码，输出字符串）
 void MatchStatus(int status, char* STATUS)
 {
 	switch (status)
 	{
 	case 1:
-		strcpy(STATUS, "订单创建"); 
+		strcpy(STATUS, "订单创建");
 		settextcolor(COLOR_PURPLE);
 		return;
 	case 21:
@@ -37,7 +37,7 @@ void MatchStatus(int status, char* STATUS)
 	}
 }
 
-//匹配人员（人员代码，输出字符串）
+//匹配人员类型（人员代码，输出字符串）
 void MatchRole(int role, char* ROLE)
 {
 	switch (role)
