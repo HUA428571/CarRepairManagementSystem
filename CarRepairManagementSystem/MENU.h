@@ -11,3 +11,7 @@ int RepairMENU_RepairMENU(int OrderID);
 
 int QualityMENU_MainMENU();
 int QualityMENU_QualityMENU(int OrderID);
+
+int ReceptionMENU_MainMENU();
+
+int ReceptionMENU_AddMENU();

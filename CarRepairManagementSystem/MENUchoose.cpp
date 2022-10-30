@@ -161,6 +161,89 @@ int QualityMENU_MainMENU_MENUChoose()
 	}
 }
 
+int ReceptionMENU_MainMENU_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 80 && m.y > 80 && m.x < 130 && m.y < 130)//鼠标按在主页区域
+				return 1;
+			if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在订单区域
+				return 2;
+			if (m.x > 80 && m.y > 260 && m.x < 130 && m.y < 310)//鼠标按在退出区域
+				return 0;
+			if (m.x > 80 && m.y > 350 && m.x < 130 && m.y < 400)//鼠标按在添加区域
+				return 4;
+
+			if (m.x > 175 && m.y > 585 && m.x < 205 && m.y < 615)//鼠标按在上一页区域
+				return 41;
+			if (m.x > 265 && m.y > 585 && m.x < 295 && m.y < 615)//鼠标按在下一页区域
+				return 42;
+			if (m.x > 315 && m.y > 580 && m.x < 315 + 100 && m.y < 620)//鼠标按在所有订单区域
+				return 43;
+			if (m.x > 430 && m.y > 580 && m.x < 430 + 100 && m.y < 620)//鼠标按在等待维修订单区域
+				return 44;
+			if (m.x > 545 && m.y > 580 && m.x < 545 + 100 && m.y < 620)//鼠标按在等待质检订单区域
+				return 45;
+			if (m.x > 660 && m.y > 580 && m.x < 660 + 100 && m.y < 620)//鼠标按在等待支付订单区域
+				return 46;
+
+			for (int i = 0; i < 13; i++)//i用来计算行数
+			{
+				if (m.x > 735 && m.y > 180 + 30 * i && m.x < 775 && m.y < 205 + 30 * i)//鼠标按在查看区域
+					return i + 201;
+			}
+		}
+	}
+}
+int ReceptionMENU_AddMENU_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 80 && m.y > 80 && m.x < 130 && m.y < 130)//鼠标按在主页区域
+				return 1;
+			if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在订单区域
+				return 2;
+			if (m.x > 80 && m.y > 260 && m.x < 130 && m.y < 310)//鼠标按在退出区域
+				return 0;
+			if (m.x > 80 && m.y > 350 && m.x < 130 && m.y < 400)//鼠标按在添加区域
+				return 4;
+
+			if (m.x > 333 && m.y > 215 && m.x < 333+220 && m.y < 215+20)//鼠标按在车牌号区域
+				return 71;
+			if (m.x > 333 && m.y > 245 && m.x < 333 + 220 && m.y < 245 + 20)//鼠标按在VIM区域
+				return 72;
+			if (m.x > 333 && m.y > 335 && m.x < 333 + 220 && m.y < 335 + 20)//鼠标按在车主区域
+				return 73;
+			if (m.x > 333 && m.y > 215 && m.x < 365 + 220 && m.y < 365 + 20)//鼠标按在车主手机区域
+				return 74;
+			if (m.x > 183 && m.y > 455 && m.x < 183 + 370 && m.y < 455 + 80)//鼠标按在状况描述区域
+				return 75;
+
+			if (m.x > 183 && m.y > 591 && m.x < 183+88 && m.y < 591+22)//鼠标按在添加维修员区域
+				return 41;
+			if (m.x > 295 && m.y > 591 && m.x < 295 + 88 && m.y < 591 + 22)//鼠标按在添加质检员区域
+				return 42;
+			if (m.x > 413 && m.y > 560 && m.x < 413 + 70 && m.y < 560 + 68)//鼠标按在取消区域
+				return 43;
+			if (m.x > 498 && m.y > 560 && m.x < 498 + 70 && m.y < 560 + 68)//鼠标按在添加区域
+				return 44;
+		}
+	}
+}
+
+
 int QualityMENU_QualityMENU_MENUChoose()
 {
 	FlushMouseMsgBuffer();

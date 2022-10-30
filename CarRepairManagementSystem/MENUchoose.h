@@ -6,6 +6,10 @@ int RepairMENU_MainMENU_MENUChoose();
 
 int QualityMENU_MainMENU_MENUChoose();
 
+int ReceptionMENU_MainMENU_MENUChoose();
+
+int ReceptionMENU_AddMENU_MENUChoose();
+
 int RepairMENU_RepairMENU_MENUChoose();
 
 int QualityMENU_QualityMENU_MENUChoose();

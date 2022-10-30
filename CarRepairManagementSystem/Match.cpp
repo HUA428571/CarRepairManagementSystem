@@ -62,3 +62,14 @@ void MatchRole(int role, char* ROLE)
 		return;
 	}
 }
+
+//输出符合MySQL格式的日期
+void MatchDate(char* buffer_Date)
+{
+	time_t NOW;
+	tm* Local;
+	NOW = time(NULL);
+	Local = localtime(&NOW);
+	sprintf(buffer_Date, "%4d-%2d-%2d", Local->tm_year + 1900, Local->tm_mon + 1, Local->tm_mday);
+	return;
+}

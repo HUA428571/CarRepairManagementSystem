@@ -72,6 +72,27 @@ void print_QualityMENU_QualityMENU_background()
 	putimage(0, 0, &BG);
 	return;
 }
+void print_ReceptionMENU_MainMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\ReceptionMENU_Home.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+void print_ReceptionMENU_AddMENU_background()
+{
+	//设置背景色
+	setbkcolor(WHITE);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\ReceptionMENU_AddMENU.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+
 
 void print_order_id(int x, int y, int OrderID)
 {
@@ -293,6 +314,139 @@ void print_quality_brief()
 
 	return;
 }
+void print_reception_brief()
+{
+	IMAGE TodayInfo_Reception;
+	loadimage(&TodayInfo_Reception, _T(".\\IMAGES\\TodayInfo_Reception.png"), 440, 580);
+	putimage(790, 70, &TodayInfo_Reception);
+
+	float order_total,order_repair,order_quality,order_unpay,order_payed;
+	char print_buffer[64] = "";
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//显示当前用户信息
+	char buffer_print_role[45] = "";
+	//查询数据
+	sprintf(query_str, "SELECT Name,Role FROM user WHERE UserID=%d;", UserID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	MatchRole(atoi(row[1]), buffer_print_role);
+
+	settextcolor(COLOR_GREY_2);
+	settextstyle(18, 0, FONT);
+	outtextxy(1080, 82, buffer_print_role);
+	int username_length = strlen(row[0]);
+	settextcolor(BLACK);
+	settextstyle(30, 0, FONT);
+	outtextxy(1170 - username_length * 15, 100, row[0]);
+	mysql_free_result(res);
+
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+
+	//总订单
+	sprintf(query_str, "SELECT count(*) FROM order_list;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	order_total = atoi(row[0]);
+	//没有订单数据
+	settextcolor(COLOR_GREY_2);
+	if (order_total == 0)
+	{
+		outtextxy(985, 185, "无数据");
+		outtextxy(855, 240, "无数据");
+		outtextxy(855, 295, "无数据");
+		outtextxy(855, 350, "无数据");
+		outtextxy(855, 405, "无数据");
+		return;
+	}
+	outtextxy(985, 185, row[0]);
+
+	//等待维修
+	sprintf(query_str,
+		"SELECT count(*) FROM order_list \
+		WHERE (Status=1 OR Status=21 OR Status=22);");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 215, row[0]);
+	order_repair = atoi(row[0]);
+
+	//等待质检
+	sprintf(query_str,
+		"SELECT count(*) FROM order_list \
+		WHERE Status=3;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 270, row[0]);
+	order_quality = atoi(row[0]);
+
+	//等待支付
+	sprintf(query_str,
+		"SELECT count(*) FROM order_list \
+		WHERE Status=4;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 325, row[0]);
+	order_unpay = atoi(row[0]);
+
+	//订单完成
+	sprintf(query_str,
+		"SELECT count(*) FROM order_list \
+		WHERE Status=5;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	outtextxy(985, 380, row[0]);
+	order_payed = atoi(row[0]);
+
+	mysql_free_result(res);
+
+	//进度条
+	setlinestyle(PS_NULL);
+	setfillcolor(COLOR_GREY_3);
+	fillrectangle(855, 240, 855 + 310, 240 + 20);
+	fillrectangle(855, 295, 855 + 310, 295 + 20);
+	fillrectangle(855, 350, 855 + 310, 350 + 20);
+	fillrectangle(855, 405, 855 + 310, 405 + 20);
+
+	setfillcolor(COLOR_BLUE);
+	sprintf(print_buffer, "%3.0f%%", 100 * order_repair / order_total);
+	outtextxy(1125, 215, print_buffer);
+	fillrectangle(855, 240, 855 + 310 * (order_repair / order_total), 240 + 20);
+
+	setfillcolor(COLOR_ORANGE);
+	sprintf(print_buffer, "%3.0f%%", 100 * order_quality / order_total);
+	outtextxy(1125, 270, print_buffer);
+	fillrectangle(855, 295, 855 + 310 * (order_quality / order_total), 295 + 20);
+
+	setfillcolor(COLOR_DEEP_BLUE);
+	sprintf(print_buffer, "%3.0f%%", 100 * order_unpay / order_total);
+	outtextxy(1125, 325, print_buffer);
+	fillrectangle(855, 350, 855 + 310 * (order_unpay / order_total), 350 + 20);
+
+	setfillcolor(COLOR_GREEN);
+	sprintf(print_buffer, "%3.0f%%", 100 * order_payed / order_total);
+	outtextxy(1125, 380, print_buffer);
+	fillrectangle(855, 405, 855 + 310 * (order_payed / order_total), 405 + 20);
+	return;
+}
+
+
 
 void print_order_info(int x, int y, int OrderID)
 {
@@ -456,11 +610,20 @@ void print_order_page_repair(int page, int count, int status)
 		//查询数据
 		if (status == 0)
 		{
-			sprintf(query_str, "SELECT OrderID,Status,OrderDate,Plate FROM order_list WHERE RepairStaffID=%d ORDER BY OrderID LIMIT %d,1;", UserID, print_row);
+			sprintf(query_str, 
+				"SELECT OrderID,Status,OrderDate,Plate \
+				FROM order_list WHERE RepairStaffID=%d \
+				ORDER BY OrderID LIMIT %d,1;"
+				, UserID, print_row);
 		}
 		else
 		{
-			sprintf(query_str, "SELECT OrderID,Status,OrderDate,Plate FROM order_list WHERE RepairStaffID=%d AND (Status=21 OR Status=22 OR Status=1) ORDER BY OrderID LIMIT %d,1;", UserID, print_row);
+			sprintf(query_str, 
+				"SELECT OrderID,Status,OrderDate,Plate \
+				FROM order_list WHERE RepairStaffID=%d \
+				AND (Status=21 OR Status=22 OR Status=1) \
+				ORDER BY OrderID LIMIT %d,1;"
+				, UserID, print_row);
 		}
 		mysql_query(&mysql, query_str);
 		//获取结果集
@@ -536,10 +699,78 @@ WHERE QualityStaffID=%d AND Status=3 ORDER BY OrderID LIMIT %d,1;", UserID, prin
 	}
 	return;
 }
+void print_order_page(int page, int count, int status)
+{
+	//本函数限定订单的状态为 status
+	//下标都从0开始（方便sql查询）
+	int print_row = 13 * (page - 1);
+
+	char query_str[512] = "";
+	//显示定位
+	int x = 180, y = 185;
+	//首先清空显示区域
+	setbkcolor(COLOR_BG);
+	clearrectangle(180, 185, 780, 565);
+	settextstyle(20, 0, FONT);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	for (int i = 0; (i < 13) && (print_row < count); i++)
+	{
+		//查询数据
+		switch (status)
+		{
+		case 0:
+			sprintf(query_str, 
+				"SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+				ORDER BY OrderID LIMIT %d,1;", print_row);
+			break;
+		case 1:
+			sprintf(query_str,
+				"SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+				WHERE (Status=1 OR Status=22 OR Status=21) \
+				ORDER BY OrderID LIMIT %d,1;", print_row);
+			break;
+		case 2:
+			sprintf(query_str,
+				"SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+				WHERE Status=3 \
+				ORDER BY OrderID LIMIT %d,1;", print_row);
+			break;
+		case 3:
+			sprintf(query_str,
+				"SELECT OrderID,Status,OrderDate,Plate FROM order_list \
+				WHERE Status=4 \
+				ORDER BY OrderID LIMIT %d,1;", print_row);
+			break;
+		}
+		mysql_query(&mysql, query_str);
+		//获取结果集
+		res = mysql_store_result(&mysql);
+		row = mysql_fetch_row(res);
+
+		print_order_rol(x, y + i * 30, row);
+
+		settextcolor(COLOR_GREEN);
+		outtextxy(x + 555, y + i * 30, "查看");//查看
+
+		mysql_free_result(res);
+
+		print_row++;
+	}
+	return;
+}
+
 
 void print_order_rol(int x, int y, MYSQL_ROW row)
 {
 	settextcolor(COLOR_GREY_2);
+	if (row == NULL)
+	{
+		outtextxy(x, y, "无有效数据");
+		return;
+	}
 	outtextxy(x, y, row[0]);//编号
 
 	char PrintBuffer[255];
@@ -575,13 +806,14 @@ int print_part_page_repair(int page, int count, int OrderID)
 		//查询数据
 		sprintf(query_str,
 			"SELECT \
-repair_record.id_RepairRecord, \
-repair_part_storage.PartName, \
-repair_part_storage.Price, \
-repair_record.Num \
-FROM repair_record,repair_part_storage \
-WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
-AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+			repair_record.id_RepairRecord, \
+			repair_part_storage.PartName, \
+			repair_part_storage.Price, \
+			repair_record.Num \
+			FROM repair_record,repair_part_storage \
+			WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+			AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;"
+			, OrderID, print_row);
 
 		mysql_query(&mysql, query_str);
 		//获取结果集
@@ -622,13 +854,14 @@ int print_part_page_quality(int page, int count, int OrderID)
 		//查询数据
 		sprintf(query_str,
 			"SELECT \
-repair_record.id_RepairRecord, \
-repair_part_storage.PartName, \
-repair_part_storage.Price, \
-repair_record.Num \
-FROM repair_record,repair_part_storage \
-WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
-AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+			repair_record.id_RepairRecord, \
+			repair_part_storage.PartName, \
+			repair_part_storage.Price, \
+			repair_record.Num \
+			FROM repair_record,repair_part_storage \
+			WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+			AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;"
+			, OrderID, print_row);
 
 		mysql_query(&mysql, query_str);
 		//获取结果集
@@ -664,13 +897,14 @@ int print_part_page_OrderCheckMENU(int page, int count, int OrderID)
 		//查询数据
 		sprintf(query_str,
 			"SELECT \
-repair_record.id_RepairRecord, \
-repair_part_storage.PartName, \
-repair_part_storage.Price, \
-repair_record.Num \
-FROM repair_record,repair_part_storage \
-WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
-AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+			repair_record.id_RepairRecord, \
+			repair_part_storage.PartName, \
+			repair_part_storage.Price, \
+			repair_record.Num \
+			FROM repair_record,repair_part_storage \
+			WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+			AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;"
+			, OrderID, print_row);
 
 		mysql_query(&mysql, query_str);
 		//获取结果集
@@ -706,13 +940,14 @@ int print_part_page_OrderCheckMENU_Visiter(int page, int count, int OrderID)
 		//查询数据
 		sprintf(query_str,
 			"SELECT \
-repair_record.id_RepairRecord, \
-repair_part_storage.PartName, \
-repair_part_storage.Price, \
-repair_record.Num \
-FROM repair_record,repair_part_storage \
-WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
-AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, print_row);
+			repair_record.id_RepairRecord, \
+			repair_part_storage.PartName, \
+			repair_part_storage.Price, \
+			repair_record.Num \
+			FROM repair_record,repair_part_storage \
+			WHERE repair_record.RepairPartID=repair_part_storage.RepairPartID \
+			AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;"
+			, OrderID, print_row);
 
 		mysql_query(&mysql, query_str);
 		//获取结果集
@@ -730,6 +965,11 @@ AND OrderID =%d ORDER BY repair_record.id_RepairRecord LIMIT %d,1;", OrderID, pr
 int print_part_rol(int x, int y, MYSQL_ROW row)
 {
 	settextcolor(COLOR_GREY_2);
+	if (row == NULL)
+	{
+		outtextxy(x, y, "无有效数据");
+		return 0;
+	}
 	outtextxy(x, y, row[0]);//编号
 	outtextxy(x + 90, y, row[1]);//名称
 	outtextxy(x + 350, y, row[2]);//单价

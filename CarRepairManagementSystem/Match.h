@@ -6,3 +6,5 @@ void MatchStatus(int status, char* STATUS);
 
 //匹配人员类型（人员代码，输出字符串）
 void MatchRole(int role, char* ROLE);
+
+void MatchDate(char* buffer_Date);

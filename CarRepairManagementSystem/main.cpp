@@ -1,5 +1,6 @@
 #pragma once
 #include"head.h"
+#define DEBUG
 
 MYSQL mysql;
 int UserID;
@@ -28,7 +29,15 @@ int main()
 	format.lfPitchAndFamily = FIXED_PITCH;
 	settextstyle(&format);						// 设置字体样式
 
+#ifdef DEBUG
+	int MENUchoice = 101;
+	UserID = 10;
+#endif // DEBUG
+
+#ifndef DEBUG
 	int MENUchoice = startMENU();
+#endif // !DEBUG
+
 	while (true)
 	{
 		switch (MENUchoice)
@@ -46,7 +55,7 @@ int main()
 			MENUchoice = 1;
 			break;
 		case 101:
-
+			ReceptionMENU_MainMENU();
 			MENUchoice = 1;
 			break;
 		case 102:
@@ -55,7 +64,7 @@ int main()
 			break;
 		case 103:
 			QualityMENU_MainMENU();
-			break;
+			MENUchoice = 1;
 		case 104:
 
 			MENUchoice = 1;
