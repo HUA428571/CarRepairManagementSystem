@@ -783,6 +783,9 @@ int RepairMENU_MainMENU()
 	//sort_flag=0,显示所有订单
 	//sort_flag=1,只显示当前身份订单
 	int sort_flag = 0;
+	char buffer_input_OrderID[32];
+	int OrderID;
+
 
 	//打印背景
 	print_RepairMENU_MainMENU_background();
@@ -791,6 +794,11 @@ int RepairMENU_MainMENU()
 	loadimage(&Repair_Order_Page_BAR_0, _T(".\\IMAGES\\Repair_Order_Page_BAR_0.png"), 450, 80);
 	IMAGE Repair_Order_Page_BAR_1;
 	loadimage(&Repair_Order_Page_BAR_1, _T(".\\IMAGES\\Repair_Order_Page_BAR_1.png"), 450, 80);
+	IMAGE SearchBlock_White;
+	loadimage(&SearchBlock_White, _T(".\\IMAGES\\SearchBlock_White.png"), 255, 110);
+	IMAGE SearchBlock_Black;
+	loadimage(&SearchBlock_Black, _T(".\\IMAGES\\SearchBlock_Black.png"), 255, 110);
+
 
 	//MYsql的查询操作
 	static MYSQL_RES* res; //查询结果集
@@ -845,10 +853,42 @@ int RepairMENU_MainMENU()
 		switch (MENUchoice)
 		{
 		case 0:
-			return MENUchoice;
+			return 1;
 		case 1:
+			return 102;
 		case 2:
-			MENUchoice = RepairMENU_MainMENU_MENUChoose();
+			//查询界面
+			setbkcolor(COLOR_BG);
+			clearrectangle(50, 140, 50 + 130, 140 + 110);
+			putimage(50, 140, &SearchBlock_White, SRCAND);
+			putimage(50, 140, &SearchBlock_Black, SRCPAINT);
+			setbkcolor(WHITE);
+			clearrectangle(130, 184, 130 + 132, 184 + 22);
+			InputBox_show(buffer_input_OrderID, 10, 130, 184, 132, 22, "请输入订单号");
+			OrderID = atoi(buffer_input_OrderID);
+			//查询订单状态
+			sprintf(query_str, "SELECT Status FROM order_list WHERE OrderID=%s;", buffer_input_OrderID);
+			mysql_query(&mysql, query_str);
+			//获取结果集
+			res = mysql_store_result(&mysql);
+			row = mysql_fetch_row(res);
+			//没有找到相应的订单
+			if (res == NULL || row == NULL)
+			{
+				IMAGE No_Order_fault;
+				settextcolor(COLOR_RED);
+				settextstyle(22, 0, FONT);
+				clearrectangle(130, 184, 130 + 132, 184 + 22);
+				outtextxy(130, 184, "无效的订单号");
+				//loadimage(&No_Order_fault, _T(".\\IMAGES\\No_Order_fault.png"), 300, 150);
+				//putimage(490, 285, &No_Order_fault);
+				Sleep(1500);
+				MENUchoice = 1;
+				break;
+			}
+			MENUchoice = OrderCheckMENU(OrderID);
+			if (MENUchoice == 3)
+				MENUchoice = 1;
 			break;
 		case 41:					//上一页
 			if (current_page != 1 && current_page != 0)
@@ -1495,6 +1535,8 @@ int QualityMENU_MainMENU()
 	//sort_flag=0,显示所有订单
 	//sort_flag=1,只显示当前身份订单
 	int sort_flag = 0;
+	char buffer_input_OrderID[32];
+	int OrderID;
 
 	//打印背景
 	print_QualityMENU_MainMENU_background();
@@ -1505,6 +1547,10 @@ int QualityMENU_MainMENU()
 	loadimage(&Quality_Order_Page_BAR_0, _T(".\\IMAGES\\Quality_Order_Page_BAR_0.png"), 450, 80);
 	IMAGE Quality_Order_Page_BAR_1;
 	loadimage(&Quality_Order_Page_BAR_1, _T(".\\IMAGES\\Quality_Order_Page_BAR_1.png"), 450, 80);
+	IMAGE SearchBlock_White;
+	loadimage(&SearchBlock_White, _T(".\\IMAGES\\SearchBlock_White.png"), 255, 110);
+	IMAGE SearchBlock_Black;
+	loadimage(&SearchBlock_Black, _T(".\\IMAGES\\SearchBlock_Black.png"), 255, 110);
 
 	//MYsql的查询操作
 	static MYSQL_RES* res; //查询结果集
@@ -1557,10 +1603,42 @@ int QualityMENU_MainMENU()
 		switch (MENUchoice)
 		{
 		case 0:
-			return MENUchoice;
+			return 1;
 		case 1:
+			return 103;
 		case 2:
-			MENUchoice = QualityMENU_MainMENU_MENUChoose();
+			//查询界面
+			setbkcolor(COLOR_BG);
+			clearrectangle(50, 140, 50 + 130, 140 + 110);
+			putimage(50, 140, &SearchBlock_White, SRCAND);
+			putimage(50, 140, &SearchBlock_Black, SRCPAINT);
+			setbkcolor(WHITE);
+			clearrectangle(130, 184, 130 + 132, 184 + 22);
+			InputBox_show(buffer_input_OrderID, 10, 130, 184, 132, 22, "请输入订单号");
+			OrderID = atoi(buffer_input_OrderID);
+			//查询订单状态
+			sprintf(query_str, "SELECT Status FROM order_list WHERE OrderID=%s;", buffer_input_OrderID);
+			mysql_query(&mysql, query_str);
+			//获取结果集
+			res = mysql_store_result(&mysql);
+			row = mysql_fetch_row(res);
+			//没有找到相应的订单
+			if (res == NULL || row == NULL)
+			{
+				IMAGE No_Order_fault;
+				settextcolor(COLOR_RED);
+				settextstyle(22, 0, FONT);
+				clearrectangle(130, 184, 130 + 132, 184 + 22);
+				outtextxy(130, 184, "无效的订单号");
+				//loadimage(&No_Order_fault, _T(".\\IMAGES\\No_Order_fault.png"), 300, 150);
+				//putimage(490, 285, &No_Order_fault);
+				Sleep(1500);
+				MENUchoice = 1;
+				break;
+			}
+			MENUchoice = OrderCheckMENU(OrderID);
+			if (MENUchoice == 3)
+				MENUchoice = 1;
 			break;
 		case 41:					//上一页
 			if (current_page != 1 && current_page != 0)
@@ -2098,6 +2176,9 @@ int ReceptionMENU_MainMENU()
 	//sort_flag=3,等待支付订单
 	int sort_flag = 0;
 
+	char buffer_input_OrderID[32];
+	int OrderID;
+
 	//打印背景
 	print_ReceptionMENU_MainMENU_background();
 	//打印摘要栏
@@ -2111,6 +2192,10 @@ int ReceptionMENU_MainMENU()
 	loadimage(&Reception_Order_Page_BAR_2, _T(".\\IMAGES\\Reception_Order_Page_BAR_2.png"), 630, 80);
 	IMAGE Reception_Order_Page_BAR_3;
 	loadimage(&Reception_Order_Page_BAR_3, _T(".\\IMAGES\\Reception_Order_Page_BAR_3.png"), 630, 80);
+	IMAGE SearchBlock_White;
+	loadimage(&SearchBlock_White, _T(".\\IMAGES\\SearchBlock_White.png"), 255, 110);
+	IMAGE SearchBlock_Black;
+	loadimage(&SearchBlock_Black, _T(".\\IMAGES\\SearchBlock_Black.png"), 255, 110);
 
 	//MYsql的查询操作
 	static MYSQL_RES* res; //查询结果集
@@ -2162,10 +2247,42 @@ int ReceptionMENU_MainMENU()
 		switch (MENUchoice)
 		{
 		case 0:
-			return MENUchoice;
+			return 1;
 		case 1:
+			return 101;
 		case 2:
-			MENUchoice = ReceptionMENU_MainMENU_MENUChoose();
+			//查询界面
+			setbkcolor(COLOR_BG);
+			clearrectangle(50, 140, 50 + 130, 140 + 110);
+			putimage(50, 140, &SearchBlock_White, SRCAND);
+			putimage(50, 140, &SearchBlock_Black, SRCPAINT);
+			setbkcolor(WHITE);
+			clearrectangle(130, 184, 130 + 132, 184 + 22);
+			InputBox_show(buffer_input_OrderID, 10, 130, 184, 132, 22, "请输入订单号");
+			OrderID = atoi(buffer_input_OrderID);
+			//查询订单状态
+			sprintf(query_str, "SELECT Status FROM order_list WHERE OrderID=%s;", buffer_input_OrderID);
+			mysql_query(&mysql, query_str);
+			//获取结果集
+			res = mysql_store_result(&mysql);
+			row = mysql_fetch_row(res);
+			//没有找到相应的订单
+			if (res == NULL || row == NULL)
+			{
+				IMAGE No_Order_fault;
+				settextcolor(COLOR_RED);
+				settextstyle(22, 0, FONT);
+				clearrectangle(130, 184, 130 + 132, 184 + 22);
+				outtextxy(130, 184, "无效的订单号");
+				//loadimage(&No_Order_fault, _T(".\\IMAGES\\No_Order_fault.png"), 300, 150);
+				//putimage(490, 285, &No_Order_fault);
+				Sleep(1500);
+				MENUchoice = 1;
+				break;
+			}
+			MENUchoice = OrderCheckMENU(OrderID);
+			if (MENUchoice == 3)
+				MENUchoice = 1;
 			break;
 		case 4:
 			MENUchoice = ReceptionMENU_AddMENU();
@@ -2596,11 +2713,11 @@ int ReceptionMENU_AddMENU()
 		switch (MENUchoice)
 		{
 		case 0:
-			return MENUchoice;
 		case 1:
 		case 2:
-			MENUchoice = ReceptionMENU_AddMENU_MENUChoose();
-			break;
+			return MENUchoice;
+			//MENUchoice = ReceptionMENU_AddMENU_MENUChoose();
+			//break;
 		case 71:					//添加车牌号
 			InputBox(buffer_input, 9, "请输入车牌号");
 			if (strlen(buffer_input) == 8)

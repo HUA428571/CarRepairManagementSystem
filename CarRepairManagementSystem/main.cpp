@@ -30,6 +30,7 @@ int main()
 	settextstyle(&format);						// 设置字体样式
 
 #ifdef DEBUG
+	//在DEBUG模式下直接进入相应的界面
 	int MENUchoice = 101;
 	UserID = 10;
 #endif // DEBUG
@@ -55,16 +56,13 @@ int main()
 			MENUchoice = 1;
 			break;
 		case 101:
-			ReceptionMENU_MainMENU();
-			MENUchoice = 1;
+			MENUchoice = ReceptionMENU_MainMENU();
 			break;
 		case 102:
-			RepairMENU_MainMENU();
-			MENUchoice = 1;
+			MENUchoice = RepairMENU_MainMENU();
 			break;
 		case 103:
-			QualityMENU_MainMENU();
-			MENUchoice = 1;
+			MENUchoice = QualityMENU_MainMENU();
 		case 104:
 
 			MENUchoice = 1;

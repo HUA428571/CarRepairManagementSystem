@@ -288,8 +288,8 @@ int OrderCheckMENU_MENUChoose()
 		{
 			if (m.x > 80 && m.y > 80 && m.x < 130 && m.y < 130)//鼠标按在主页区域
 				return 1;
-			if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在订单区域
-				return 2;
+			//if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在订单区域
+			//	return 2;
 			if (m.x > 80 && m.y > 260 && m.x < 130 && m.y < 310)//鼠标按在退出区域
 				return 0;
 			if (m.x > 80 && m.y > 350 && m.x < 130 && m.y < 400)//鼠标按在返回区域
