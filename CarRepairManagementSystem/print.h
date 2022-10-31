@@ -14,6 +14,10 @@ void print_ReceptionMENU_MainMENU_background();
 
 void print_ReceptionMENU_AddMENU_background();
 
+void print_AdminMENU_MainMENU_background();
+
+void print_AdminMENU_PeopleMENU_background();
+
 //打印订单查看 背景
 void print_OrderCheckMENU_background();
 //打印订单查看 客户 已支付（状态5） 背景
@@ -62,3 +66,7 @@ int print_part_page_OrderCheckMENU_Visiter(int page, int count, int OrderID);
 
 //打印一行配件信息
 int print_part_rol(int x, int y, MYSQL_ROW row);
+
+void print_people_page(int page, int count);
+
+void print_people_rol(int x, int y, MYSQL_ROW row);

@@ -92,7 +92,26 @@ void print_ReceptionMENU_AddMENU_background()
 	putimage(0, 0, &BG);
 	return;
 }
-
+void print_AdminMENU_MainMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\AdminMENU_Home.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
+void print_AdminMENU_PeopleMENU_background()
+{
+	//设置背景色
+	setbkcolor(COLOR_BG);
+	//设置背景
+	IMAGE BG;
+	loadimage(&BG, _T(".\\IMAGES\\AdminMENU_People.png"), 1280, 720);
+	putimage(0, 0, &BG);
+	return;
+}
 
 void print_order_id(int x, int y, int OrderID)
 {
@@ -447,7 +466,6 @@ void print_reception_brief()
 }
 
 
-
 void print_order_info(int x, int y, int OrderID)
 {
 	IMAGE Order_Info_BG;
@@ -587,6 +605,7 @@ void print_CarOwner_info(int x, int y, int OrderID)
 	}
 	return;
 }
+
 
 void print_order_page_repair(int page, int count, int status)
 {
@@ -762,7 +781,6 @@ void print_order_page(int page, int count, int status)
 	return;
 }
 
-
 void print_order_rol(int x, int y, MYSQL_ROW row)
 {
 	settextcolor(COLOR_GREY_2);
@@ -783,6 +801,7 @@ void print_order_rol(int x, int y, MYSQL_ROW row)
 
 	return;
 }
+
 
 int print_part_page_repair(int page, int count, int OrderID)
 {
@@ -976,3 +995,65 @@ int print_part_rol(int x, int y, MYSQL_ROW row)
 	outtextxy(x + 440, y, row[3]);//件数
 	return atoi(row[2]);
 }
+
+
+void print_people_page(int page, int count)
+{
+	//下标都从0开始（方便sql查询）
+	int print_row = 10 * (page - 1);
+
+	char query_str[512] = "";
+	//显示定位
+	int x = 180, y = 185;
+	//首先清空显示区域
+	setbkcolor(COLOR_BG);
+	clearrectangle(180, 185, 180 + 650, 185 + 290);
+	settextstyle(20, 0, FONT);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	for (int i = 0; (i < 10) && (print_row < count); i++)
+	{
+		//查询数据
+		sprintf(query_str,
+			"SELECT UserID,  UserName,Name, Role FROM user \
+			ORDER BY Role LIMIT %d,1;"
+			, print_row);
+
+		mysql_query(&mysql, query_str);
+		//获取结果集
+		res = mysql_store_result(&mysql);
+		row = mysql_fetch_row(res);
+
+		print_people_rol(x, y + i * 30, row);
+
+		settextcolor(COLOR_ORANGE);
+		settextstyle(20, 0, FONT);
+		outtextxy(x + 455, y + i * 30, "修改密码");//修改密码
+
+		settextcolor(COLOR_RED);
+		settextstyle(20, 0, FONT);
+		outtextxy(x + 555, y + i * 30, "删除");//删除
+
+		mysql_free_result(res);
+		print_row++;
+	}
+}
+void print_people_rol(int x, int y, MYSQL_ROW row)
+{
+	settextcolor(COLOR_GREY_2);
+	char role_buffer[32] = "";
+	if (row == NULL)
+	{
+		outtextxy(x, y, "无有效数据");
+		return ;
+	}
+	outtextxy(x, y, row[0]);//编号
+	outtextxy(x + 75, y, row[1]);//用户名
+	outtextxy(x + 235, y, row[2]);//姓名
+	MatchRole_with_color(atoi(row[3]), role_buffer);
+	outtextxy(x + 335, y, role_buffer);//身份
+	return ;
+}
+

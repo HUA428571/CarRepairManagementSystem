@@ -149,14 +149,15 @@ int InputBox_show(char* Input, int Limit, int x, int y, int Lsize, int Hsize, co
 	char c;
 	int Length = 0;
 	char InputBuf[100] = { '\0' };
-	//MOUSEMSG m;
 	settextstyle(Hsize, 0, FONT);
+	setlinestyle(PS_SOLID, 1);
 	setlinecolor(BLACK);
-	for (int i = x; i < x + Lsize; i++)
-	{
-		line(i, y + Hsize, i + 1, y + Hsize);
-		//Sleep(1);
-	}
+	line(x, y + Hsize, x + Lsize, y + Hsize);
+	//for (int i = x; i < x + Lsize; i++)
+	//{
+	//	line(i, y + Hsize, i + 1, y + Hsize);
+	//	Sleep(1);
+	//}
 	settextcolor(RGB(220, 220, 220));
 	outtextxy(x, y, Default);
 	settextcolor(BLACK);
@@ -320,7 +321,7 @@ int calaulate_part_total_price(int OrderID)
 	static MYSQL_ROW row;  //记录结构体
 	char query_str[512] = "";
 
-	sprintf(query_str, 
+	sprintf(query_str,
 		"SELECT repair_part_storage.Price,repair_record.Num \
 		FROM repair_record, repair_part_storage\
 		WHERE repair_record.RepairPartID = repair_part_storage.RepairPartID\

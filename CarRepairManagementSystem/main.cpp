@@ -31,8 +31,8 @@ int main()
 
 #ifdef DEBUG
 	//在DEBUG模式下直接进入相应的界面
-	int MENUchoice = 101;
-	UserID = 10;
+	int MENUchoice = 100;
+	UserID = 1;
 #endif // DEBUG
 
 #ifndef DEBUG
@@ -52,8 +52,7 @@ int main()
 			MENUchoice = startMENU();
 			break;
 		case 100:
-
-			MENUchoice = 1;
+			MENUchoice = AdminMENU_MainMENU();
 			break;
 		case 101:
 			MENUchoice = ReceptionMENU_MainMENU();

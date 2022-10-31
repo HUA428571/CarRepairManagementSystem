@@ -243,6 +243,99 @@ int ReceptionMENU_AddMENU_MENUChoose()
 	}
 }
 
+int AdminMENU_MainMENU_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 80 && m.y > 80 && m.x < 130 && m.y < 130)//鼠标按在主页区域
+				return 1;
+			if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在订单区域
+				return 2;
+			if (m.x > 80 && m.y > 260 && m.x < 130 && m.y < 310)//鼠标按在退出区域
+				return 0;
+			if (m.x > 80 && m.y > 350 && m.x < 130 && m.y < 400)//鼠标按在人员管理区域
+				return 4;
+
+			if (m.x > 175 && m.y > 585 && m.x < 205 && m.y < 615)//鼠标按在上一页区域
+				return 41;
+			if (m.x > 265 && m.y > 585 && m.x < 295 && m.y < 615)//鼠标按在下一页区域
+				return 42;
+			if (m.x > 315 && m.y > 580 && m.x < 315 + 100 && m.y < 620)//鼠标按在所有订单区域
+				return 43;
+			if (m.x > 430 && m.y > 580 && m.x < 430 + 100 && m.y < 620)//鼠标按在等待维修订单区域
+				return 44;
+			if (m.x > 545 && m.y > 580 && m.x < 545 + 100 && m.y < 620)//鼠标按在等待质检订单区域
+				return 45;
+			if (m.x > 660 && m.y > 580 && m.x < 660 + 100 && m.y < 620)//鼠标按在等待支付订单区域
+				return 46;
+
+			for (int i = 0; i < 13; i++)//i用来计算行数
+			{
+				if (m.x > 735 && m.y > 180 + 30 * i && m.x < 775 && m.y < 205 + 30 * i)//鼠标按在查看区域
+					return i + 201;
+			}
+		}
+	}
+}
+int AdminMENU_PeopleMENU_MENUChoose()
+{
+	FlushMouseMsgBuffer();
+	while (true)
+	{
+		MOUSEMSG m;
+		// 获取一条鼠标消息
+		m = GetMouseMsg();
+		if (m.uMsg == WM_LBUTTONDOWN)//如果左键被按下
+		{
+			if (m.x > 80 && m.y > 80 && m.x < 130 && m.y < 130)//鼠标按在主页区域
+				return 1;
+			if (m.x > 80 && m.y > 170 && m.x < 130 && m.y < 220)//鼠标按在搜索区域
+				return 2;
+			if (m.x > 80 && m.y > 260 && m.x < 130 && m.y < 310)//鼠标按在退出区域
+				return 0;
+			if (m.x > 80 && m.y > 350 && m.x < 130 && m.y < 400)//鼠标按在人员管理区域
+				return 3;
+
+			if (m.x > 175 && m.y > 495 && m.x < 205 && m.y < 525)//鼠标按在上一页区域
+				return 41;
+			if (m.x > 265 && m.y > 495 && m.x < 295 && m.y < 525)//鼠标按在下一页区域
+				return 42;
+
+			for (int i = 0; i < 10; i++)//i用来计算行数
+			{
+				if (m.x > 635 && m.y > 185 + 30 * i && m.x < 715 && m.y < 205 + 30 * i)//鼠标按在修改密码区域
+					return i + 101;
+				if (m.x > 735 && m.y > 185 + 30 * i && m.x < 775 && m.y < 205 + 30 * i)//鼠标按在删除区域
+					return i + 201;
+			}
+
+			if (m.x > 190 && m.y > 580 && m.x < 190 + 88 && m.y < 580 + 22)//鼠标按在姓名区域
+				return 51;
+			if (m.x > 300 && m.y > 580 && m.x < 300 + 132 && m.y < 580 + 22)//鼠标按在用户名区域
+				return 52;
+			if (m.x > 460 && m.y > 580 && m.x < 460 + 44 && m.y < 580 + 22)//鼠标按在密码区域
+				return 53;
+			if (m.x > 535 && m.y > 580 && m.x < 535 + 22 && m.y < 580 + 22)//鼠标按在接待专员区域
+				return 54;
+			if (m.x > 565 && m.y > 580 && m.x < 565 + 22 && m.y < 580 + 22)//鼠标按在维修专员区域
+				return 55;
+			if (m.x > 595 && m.y > 580 && m.x < 595 + 22 && m.y < 580 + 22)//鼠标按在质检专员区域
+				return 56;
+			if (m.x > 625 && m.y > 580 && m.x < 625 + 22 && m.y < 580 + 22)//鼠标按在库管专员区域
+				return 57;
+
+			if (m.x > 690 && m.y > 545 && m.x < 690 + 100 && m.y < 545 + 75)//鼠标按在添加区域
+				return 58;
+		}
+	}
+}
+
 
 int QualityMENU_QualityMENU_MENUChoose()
 {

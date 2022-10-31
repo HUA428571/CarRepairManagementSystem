@@ -62,6 +62,36 @@ void MatchRole(int role, char* ROLE)
 		return;
 	}
 }
+void MatchRole_with_color(int role, char* ROLE)
+{
+	switch (role)
+	{
+	case 0:
+		strcpy(ROLE, "管理员");
+		settextcolor(COLOR_GREEN);
+		return;
+	case 1:
+		strcpy(ROLE, "接待专员");
+		settextcolor(COLOR_PURPLE);
+		return;
+	case 2:
+		strcpy(ROLE, "维修专员");
+		settextcolor(COLOR_BLUE);
+		return;
+	case 3:
+		strcpy(ROLE, "质检专员");
+		settextcolor(COLOR_ORANGE);
+		return;
+	case 4:
+		strcpy(ROLE, "库管专员");
+		settextcolor(COLOR_RED);
+		return;
+	default:
+		strcpy(ROLE, "无信息");
+		return;
+	}
+}
+
 
 //输出符合MySQL格式的日期
 void MatchDate(char* buffer_Date)
