@@ -1,6 +1,6 @@
 #pragma once
 #include"head.h"
-#define DEBUG
+//#define DEBUG
 
 MYSQL mysql;
 int UserID;
@@ -31,8 +31,8 @@ int main()
 
 #ifdef DEBUG
 	//在DEBUG模式下直接进入相应的界面
-	int MENUchoice = 100;
-	UserID = 1;
+	int MENUchoice = 104;
+	UserID = 42;
 #endif // DEBUG
 
 #ifndef DEBUG
@@ -62,13 +62,9 @@ int main()
 			break;
 		case 103:
 			MENUchoice = QualityMENU_MainMENU();
-		case 104:
-
-			MENUchoice = 1;
 			break;
-		case 105:
-
-			MENUchoice = 1;
+		case 104:
+			MENUchoice = StorageMENU_MainMENU();
 			break;
 		}
 	}

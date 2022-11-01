@@ -18,3 +18,8 @@ int ReceptionMENU_AddMENU();
 int AdminMENU_MainMENU();
 int AdminMENU_PeopleMENU();
 
+int StorageMENU_MainMENU();
+
+int StorageMENU_ChangeMENU(int PartID);
+
+int StorageMENU_AddMENU();

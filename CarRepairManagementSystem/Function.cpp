@@ -174,7 +174,7 @@ int InputBox_show(char* Input, int Limit, int x, int y, int Lsize, int Hsize, co
 				outtextxy(x, y, Default);
 				settextcolor(BLACK);
 			}
-			if (c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '.' || c == '\\' || c == '/' || c == '_' || c == ':' || c == '-')
+			if (c >= '0' && c <= '9' || c >= 'a' && c <= ' z' || c >= 'A' && c <= 'Z' || c == '.' || c == '\\' || c == '/' || c == '_' || c == ':' || c == '-')
 			{
 				if (Length == Limit)
 				{

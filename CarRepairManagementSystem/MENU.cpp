@@ -2937,7 +2937,6 @@ int AdminMENU_MainMENU()
 	//管理员主页,显示订单信息
 	//获取订单数
 	int count_all;//订单总数
-	int count_finish;
 	int current_page = 0;
 	int max_page = 0;
 	//sort_flag=0,显示所有订单
@@ -3811,6 +3810,650 @@ int AdminMENU_PeopleMENU()
 			}
 			MENUchoice = AdminMENU_PeopleMENU_MENUChoose();
 			break;
+		}
+	}
+}
+
+int StorageMENU_MainMENU()
+{
+	//管理员主页,显示订单信息
+	//获取订单数
+	int count_all;//配件总数
+	int current_page = 0;
+	int max_page = 0;
+	//sort_flag=0,显示所有库存
+	//sort_flag=1,等待库存不足
+	int sort_flag = 0;
+
+	char buffer_input_PartID[32];
+	int PartID;
+	char page_buffer[8];
+	//加载图片
+	IMAGE Storage_BAR_0;
+	loadimage(&Storage_BAR_0, _T(".\\IMAGES\\Storage_BAR_0.png"), 660, 170);
+	IMAGE Storage_BAR_1;
+	loadimage(&Storage_BAR_1, _T(".\\IMAGES\\Storage_BAR_1.png"), 660, 170);
+	IMAGE Storage_Bar_Add;
+	loadimage(&Storage_Bar_Add, _T(".\\IMAGES\\Storage_Bar_Add.png"), 630, 85);
+	IMAGE Storage_Bar_Change;
+	loadimage(&Storage_Bar_Change, _T(".\\IMAGES\\Storage_Bar_Change.png"), 630, 85);
+	IMAGE SearchBlock_White;
+	loadimage(&SearchBlock_White, _T(".\\IMAGES\\SearchBlock_White_9.png"), 320, 110);
+	IMAGE SearchBlock_Black;
+	loadimage(&SearchBlock_Black, _T(".\\IMAGES\\No_Part_fault.png"), 320, 110);
+	IMAGE No_Part_fault;
+	loadimage(&No_Part_fault, _T(".\\IMAGES\\No_Part_fault.png"), 300, 150);
+
+	//打印背景
+	print_StorageMENU_MainMENU_background();
+	//打印摘要栏
+	print_storage_brief();
+
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+
+	//查询数据（全部库存）
+	sprintf(query_str, "SELECT count(*) FROM repair_part_storage;");
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	mysql_free_result(res);
+	count_all = atoi(row[0]);
+
+	//加载一下底部贴图
+	putimage(150, 470, &Storage_BAR_0);
+	if (count_all == 0)
+	{
+		settextcolor(COLOR_GREY_2);
+		settextstyle(20, 0, FONT);
+		outtextxy(180, 185, "暂无相关数据！");
+		current_page = 0;
+		max_page = 0;
+	}
+	else
+	{
+		//先打印第一页
+		current_page = 1;
+		print_storage_page(current_page, count_all, sort_flag);
+		max_page = (int)((count_all - 1) / 10) + 1;
+	}
+	//先清空页码区域
+	setbkcolor(COLOR_WHITE);
+	clearrectangle(210, 500, 230, 520);
+	clearrectangle(240, 500, 260, 520);
+	settextcolor(BLACK);
+	settextstyle(20, 0, FONT);
+	//显示当前页码
+	sprintf(page_buffer, _T("%2d"), current_page);
+	outtextxy(210, 500, page_buffer);
+	sprintf(page_buffer, _T("%d"), max_page);
+	outtextxy(240, 500, page_buffer);
+
+	//等待鼠标
+	int MENUchoice = StorageMENU_MainMENU_MENUChoose();
+	int row_clicked = -1;
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+			return 1;
+		case 1:
+			return 104;
+		case 2:
+			//查询界面
+			if (InputBox(buffer_input_PartID, 20, "请输入配件名称"))
+			{
+				setbkcolor(COLOR_BG);
+				//查询状态
+				sprintf(query_str,
+					"SELECT RepairPartID, PartName, Price, Num, Req FROM repair_part_storage WHERE PartName='%s';"
+					, buffer_input_PartID);
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				if (res == NULL)
+				{
+					putimage(490, 285, &No_Part_fault);
+					Sleep(1500);
+					MENUchoice = 1;
+					break;
+				}
+				row = mysql_fetch_row(res);
+				//没有找到相应的订单
+				if (row == NULL)
+				{
+					putimage(490, 285, &No_Part_fault);
+					Sleep(1500);
+					MENUchoice = 1;
+					break;
+				}
+				clearrectangle(180, 185, 180 + 650, 185 + 290);
+
+				settextstyle(20, 0, FONT);
+				print_storage_rol(180, 185, row);
+				MENUchoice = StorageMENU_ChangeMENU(atoi(row[0]));
+				if (MENUchoice == 3)
+				{
+					MENUchoice = 1;
+				}
+			}
+			else
+			{
+				MENUchoice = StorageMENU_MainMENU_MENUChoose();
+			}
+			break;
+		case 4:
+			//添加配件
+			MENUchoice = StorageMENU_AddMENU();
+			break;
+		case 41:					//上一页
+			if (current_page != 1 && current_page != 0)
+			{
+				current_page--;
+				print_storage_page(current_page, count_all, sort_flag);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = StorageMENU_MainMENU_MENUChoose();
+			break;
+		case 42:					//下一页
+			if (current_page != max_page && current_page != 0)
+			{
+				current_page++;
+				print_storage_page(current_page, count_all, sort_flag);
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = StorageMENU_MainMENU_MENUChoose();
+			break;
+		case 43:
+			//鼠标按在所有订单区域
+			if (sort_flag != 0)
+			{
+				sort_flag = 0;
+				putimage(150, 470, &Storage_BAR_0);
+
+				//查询数据
+				sprintf(query_str, "SELECT count(*) FROM repair_part_storage;");
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				mysql_free_result(res);
+				count_all = atoi(row[0]);
+
+				setbkcolor(COLOR_BG);
+				clearrectangle(180, 185, 180 + 650, 185 + 290);
+
+				if (count_all == 0)
+				{
+					settextcolor(COLOR_GREY_2);
+					settextstyle(20, 0, FONT);
+					outtextxy(180, 185, "暂无相关数据！");
+					current_page = 0;
+					max_page = 0;
+				}
+				else
+				{
+					//先打印第一页
+					current_page = 1;
+					print_storage_page(current_page, count_all, sort_flag);
+					max_page = (int)((count_all - 1) / 10) + 1;
+				}
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = StorageMENU_MainMENU_MENUChoose();
+			break;
+		case 44:
+			//鼠标按在库存不足区域
+			if (sort_flag != 1)
+			{
+				sort_flag = 1;
+				putimage(150, 470, &Storage_BAR_1);
+
+				//查询数据
+				sprintf(query_str,
+					"SELECT count(*) FROM repair_part_storage \
+					WHERE Req>0;");
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				mysql_free_result(res);
+				count_all = atoi(row[0]);
+
+				setbkcolor(COLOR_BG);
+				clearrectangle(180, 185, 180 + 650, 185 + 290);
+
+				if (count_all == 0)
+				{
+					settextcolor(COLOR_GREY_2);
+					settextstyle(20, 0, FONT);
+					outtextxy(180, 185, "暂无相关数据！");
+					current_page = 0;
+					max_page = 0;
+				}
+				else
+				{
+					//先打印第一页
+					current_page = 1;
+					print_storage_page(current_page, count_all, sort_flag);
+					max_page = (int)((count_all - 1) / 10) + 1;
+				}
+				//先清空页码区域
+				setbkcolor(COLOR_WHITE);
+				clearrectangle(210, 500, 230, 520);
+				clearrectangle(240, 500, 260, 520);
+				settextcolor(BLACK);
+				settextstyle(20, 0, FONT);
+				//显示当前页码
+				sprintf(page_buffer, _T("%2d"), current_page);
+				outtextxy(210, 500, page_buffer);
+				sprintf(page_buffer, _T("%d"), max_page);
+				outtextxy(240, 500, page_buffer);
+			}
+			MENUchoice = StorageMENU_MainMENU_MENUChoose();
+			break;
+		case 90:
+			return 104;
+		case 201:
+		case 202:
+		case 203:
+		case 204:
+		case 205:
+		case 206:
+		case 207:
+		case 208:
+		case 209:
+		case 210:
+			//修改
+			//首先判断该页的订单数量
+			//当前点击行数（从0开始，整张表）
+			row_clicked = MENUchoice % 100 + 10 * (current_page - 1) - 1;
+			if (row_clicked < count_all)
+			{
+				switch (sort_flag)
+				{
+				case 0:
+					sprintf(query_str,
+						"SELECT RepairPartID \
+						FROM repair_part_storage \
+						ORDER BY RepairPartID LIMIT %d,1;"
+						, row_clicked);
+					break;
+				case 1:
+					sprintf(query_str,
+						"SELECT RepairPartID \
+						FROM repair_part_storage \
+						WHERE Req>0 \
+						ORDER BY RepairPartID LIMIT %d,1;"
+						, row_clicked);
+					break;
+				}
+				mysql_query(&mysql, query_str);
+				//获取结果集
+				res = mysql_store_result(&mysql);
+				row = mysql_fetch_row(res);
+				PartID = atoi(row[0]);
+				mysql_free_result(res);
+
+				MENUchoice = StorageMENU_ChangeMENU(PartID);
+
+				if (MENUchoice == 3)
+				{
+					//重新显示本页信息
+					//打印背景
+					print_StorageMENU_MainMENU_background();
+					switch (sort_flag)
+					{
+					case 0:
+						putimage(150, 470, &Storage_BAR_0);
+						break;
+					case 1:
+						putimage(150, 470, &Storage_BAR_1);
+						break;
+					}
+					//打印消息栏
+					print_storage_brief();
+					print_storage_page(current_page, count_all, sort_flag);
+					//先清空页码区域
+					setbkcolor(COLOR_WHITE);
+					clearrectangle(210, 500, 230, 520);
+					clearrectangle(240, 500, 260, 520);
+					settextcolor(BLACK);
+					settextstyle(20, 0, FONT);
+					//显示当前页码
+					sprintf(page_buffer, _T("%2d"), current_page);
+					outtextxy(210, 500, page_buffer);
+					sprintf(page_buffer, _T("%d"), max_page);
+					outtextxy(240, 500, page_buffer);
+					MENUchoice = StorageMENU_MainMENU_MENUChoose();
+					break;
+				}
+				break;
+			}
+		}
+	}
+}
+
+
+int StorageMENU_ChangeMENU(int PartID)
+{
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+	char buffer_input[128] = "";
+	char buffer_PartName[128] = "";
+	char buffer_Print[128] = "";
+	int buffer_Price;
+	int buffer_Num;
+	int buffer_Req;
+
+	IMAGE Storage_Changed_tip;
+	loadimage(&Storage_Changed_tip, _T(".\\IMAGES\\Storage_Changed_tip.png"), 300, 150);
+	IMAGE Storage_Bar_Change;
+	loadimage(&Storage_Bar_Change, _T(".\\IMAGES\\Storage_Bar_Change.png"), 630, 85);
+	RECT print_rect;
+
+	putimage(165, 540, &Storage_Bar_Change);
+
+	//显示定位
+	int x, y, w, h;
+
+	sprintf(query_str,
+		"SELECT RepairPartID, PartName, Price, Num, Req \
+		FROM repair_part_storage \
+		WHERE RepairPartID=%d;"
+		, PartID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+	mysql_free_result(res);
+
+	x = 190;
+	y = 580;
+	w = 44;
+	h = 22;
+	settextstyle(22, 0, FONT);
+	settextcolor(BLACK);
+	print_rect = { x, y, x + w, y + h };
+	drawtext(row[0], &print_rect, DT_CENTER | DT_VCENTER);//编号
+	x += 64;
+	w = 214;
+	print_rect = { x, y, x + w, y + h };
+	drawtext(row[1], &print_rect, DT_CENTER | DT_VCENTER);//配件名称
+	x += 234;
+	w = 44;
+	print_rect = { x, y, x + w, y + h };
+	drawtext(row[2], &print_rect, DT_CENTER | DT_VCENTER);//价格
+	if (atoi(row[4]) > 0)
+	{
+		settextcolor(COLOR_RED);
+		x += 64;
+		print_rect = { x, y, x + w, y + h };
+		drawtext(row[3], &print_rect, DT_CENTER | DT_VCENTER);//库存
+	}
+	else
+	{
+		settextcolor(COLOR_GREEN);
+		x += 64;
+		print_rect = { x, y, x + w, y + h };
+		drawtext(row[3], &print_rect, DT_CENTER | DT_VCENTER);//库存
+	}
+	strcpy(buffer_PartName, row[1]);
+	buffer_Price = atoi(row[2]);
+	buffer_Num = atoi(row[3]);
+	buffer_Req = atoi(row[4]);
+	int MENUchoice = StorageMENU_ChangeMENU_MENUChoose();
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 41:
+		case 42:
+		case 43:
+		case 44:
+		case 201:
+		case 202:
+		case 203:
+		case 204:
+		case 205:
+		case 206:
+		case 207:
+		case 208:
+		case 209:
+		case 210:
+			return MENUchoice;
+		case 51:
+			//修改名称
+			InputBox(buffer_input, 20, "请输入配件名称");
+			if (strlen(buffer_input) > 0)
+			{
+				strcpy(buffer_PartName, buffer_input);
+				clearrectangle(254, 580, 254 + 214, 580 + 22);
+				print_rect = { 254, 580, 254 + 214, 580 + 22 };
+				settextcolor(COLOR_PURPLE);
+				settextstyle(22, 0, FONT);
+				drawtext(buffer_PartName, &print_rect, DT_CENTER | DT_VCENTER);
+			}
+			MENUchoice = StorageMENU_ChangeMENU_MENUChoose();
+			break;
+		case 52:
+			//修改价格
+			InputBox(buffer_input, 6, "请输入配件价格");
+			if (strlen(buffer_input) > 0)
+			{
+				buffer_Price = atoi(buffer_input);
+				clearrectangle(488, 580, 488 + 44, 580 + 22);
+				print_rect = { 488, 580, 488 + 44, 580 + 22 };
+				settextcolor(COLOR_PURPLE);
+				settextstyle(22, 0, FONT);
+				drawtext(buffer_input, &print_rect, DT_CENTER | DT_VCENTER);
+			}
+			MENUchoice = StorageMENU_ChangeMENU_MENUChoose();
+			break;
+		case 53:
+			//修改库存
+			InputBox(buffer_input, 6, "请输入库存修改\n正数为增加量，负数为减少量");
+			if (strlen(buffer_input) > 0)
+			{
+				buffer_Num += atoi(buffer_input);
+				clearrectangle(552, 580, 552 + 44, 580 + 22);
+				print_rect = { 552, 580, 552 + 44, 580 + 22 };
+				settextcolor(COLOR_PURPLE);
+				settextstyle(22, 0, FONT);
+				sprintf(buffer_Print, "%d", buffer_Num);
+				drawtext(buffer_Print, &print_rect, DT_CENTER | DT_VCENTER);
+			}
+			if (buffer_Num - buffer_Req >= 0)
+			{
+				buffer_Req = 0;
+			}
+			MENUchoice = StorageMENU_ChangeMENU_MENUChoose();
+			break;
+		case 54:
+			//修改库存信息
+			sprintf(query_str,
+				"UPDATE repair_part_storage \
+				SET PartName = '%s',Price=%d, Num=%d, Req=%d WHERE RepairPartID =%d;"
+				, buffer_PartName, buffer_Price, buffer_Num, buffer_Req, PartID);
+			mysql_query(&mysql, query_str);
+			putimage(490, 285, &Storage_Changed_tip);
+			Sleep(1500);
+			return 3;
+		case 55:
+			sprintf(query_str,
+				"DELETE FROM repair_part_storage WHERE RepairPartID=%d;", PartID);
+			mysql_query(&mysql, query_str);
+			return 90;
+		}
+	}
+}
+
+int StorageMENU_AddMENU()
+{
+	//MYsql的查询操作
+	static MYSQL_RES* res; //查询结果集
+	static MYSQL_ROW row;  //记录结构体
+	char query_str[512] = "";
+	char buffer_input[128] = "";
+	char buffer_Print[128] = "";
+
+	char add_buffer_PartName[128] = "";
+	int add_buffer_Price;
+	int add_buffer_Num;
+	int add_buffer_Req = 0;
+
+	bool check_PartName = false;
+	bool check_Price = false;
+	bool check_Num = false;
+
+	IMAGE Add_Part_Finished_tip;
+	loadimage(&Add_Part_Finished_tip, _T(".\\IMAGES\\Add_Part_Finished_tip.png"), 300, 150);
+	IMAGE Storage_Bar_Add;
+	loadimage(&Storage_Bar_Add, _T(".\\IMAGES\\Storage_Bar_Add.png"), 630, 85);
+	IMAGE Button_Add_Purple;
+	loadimage(&Button_Add_Purple, _T(".\\IMAGES\\Button_Add_Purple.png"), 90, 360);
+	RECT print_rect;
+
+	putimage(165, 540, &Storage_Bar_Add);
+	putimage(60, 60, &Button_Add_Purple);
+
+
+	int MENUchoice = StorageMENU_AddMENU_MENUChoose();
+	while (true)
+	{
+		switch (MENUchoice)
+		{
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 41:
+		case 42:
+		case 43:
+		case 44:
+		case 201:
+		case 202:
+		case 203:
+		case 204:
+		case 205:
+		case 206:
+		case 207:
+		case 208:
+		case 209:
+		case 210:
+			return MENUchoice;
+		case 51:
+			//修改名称
+			InputBox(buffer_input, 20, "请输入配件名称");
+			if (strlen(buffer_input) > 0)
+			{
+				check_PartName = true;
+				strcpy(add_buffer_PartName, buffer_input);
+				clearrectangle(194, 580, 194 + 270, 580 + 22);
+				settextcolor(BLACK);
+				settextstyle(22, 0, FONT);
+				outtextxy(194, 580, add_buffer_PartName);
+			}
+			else
+			{
+				check_PartName = false;
+				clearrectangle(194, 580, 194 + 270, 580 + 22);
+			}
+			MENUchoice = StorageMENU_AddMENU_MENUChoose();
+			break;
+		case 52:
+			//修改价格
+			InputBox(buffer_input, 6, "请输入配件价格");
+			if (strlen(buffer_input) > 0)
+			{
+				check_Price = true;
+				add_buffer_Price = atoi(buffer_input);
+				clearrectangle(472, 580, 472 + 55, 580 + 22);
+				print_rect = { 472, 580, 472 + 55, 580 + 22 };
+				settextcolor(BLACK);
+				settextstyle(22, 0, FONT);
+				drawtext(buffer_input, &print_rect, DT_CENTER | DT_VCENTER);
+			}
+			else
+			{
+				check_Price = false;
+				clearrectangle(472, 580, 472 + 55, 580 + 22);
+			}
+			MENUchoice = StorageMENU_AddMENU_MENUChoose();
+			break;
+		case 53:
+			//修改库存
+			InputBox(buffer_input, 6, "请输入库存");
+			if (strlen(buffer_input) > 0)
+			{
+				check_Num = true;
+				add_buffer_Num = atoi(buffer_input);
+				clearrectangle(537, 580, 537 + 55, 580 + 22);
+				print_rect = { 537, 580, 537 + 55, 580 + 22 };
+				settextcolor(BLACK);
+				settextstyle(22, 0, FONT);
+				drawtext(buffer_input, &print_rect, DT_CENTER | DT_VCENTER);
+			}
+			else
+			{
+				check_Num = false;
+				clearrectangle(537, 580, 537 + 55, 580 + 22);
+			}
+			MENUchoice = StorageMENU_AddMENU_MENUChoose();
+			break;
+		case 54:
+			return 90;
+		case 55:
+			//修改库存信息
+			sprintf(query_str,
+				"INSERT INTO repair_part_storage \
+					(PartName, Price, Num, Req) \
+					VALUES('%s', %d, %d, 0);",
+				add_buffer_PartName, add_buffer_Price, add_buffer_Num);
+			mysql_query(&mysql, query_str);
+			putimage(490, 285, &Add_Part_Finished_tip);
+			Sleep(1500);
+			return 90;
 		}
 	}
 }

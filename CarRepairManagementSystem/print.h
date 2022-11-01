@@ -18,6 +18,8 @@ void print_AdminMENU_MainMENU_background();
 
 void print_AdminMENU_PeopleMENU_background();
 
+void print_StorageMENU_MainMENU_background();
+
 //打印订单查看 背景
 void print_OrderCheckMENU_background();
 //打印订单查看 客户 已支付（状态5） 背景
@@ -37,6 +39,8 @@ void print_repair_brief();
 void print_quality_brief();
 //打印接待 摘要模块
 void print_reception_brief();
+
+void print_storage_brief();
 
 //打印订单信息模块
 void print_order_info(int x, int y, int OrderID);
@@ -70,3 +74,7 @@ int print_part_rol(int x, int y, MYSQL_ROW row);
 void print_people_page(int page, int count);
 
 void print_people_rol(int x, int y, MYSQL_ROW row);
+
+void print_storage_page(int page, int count, int flag);
+
+void print_storage_rol(int x, int y, MYSQL_ROW row);
