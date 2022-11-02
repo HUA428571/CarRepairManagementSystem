@@ -100,6 +100,6 @@ void MatchDate(char* buffer_Date)
 	tm* Local;
 	NOW = time(NULL);
 	Local = localtime(&NOW);
-	sprintf(buffer_Date, "%4d-%2d-%2d", Local->tm_year + 1900, Local->tm_mon + 1, Local->tm_mday);
+	sprintf(buffer_Date, "%04d-%02d-%02d", Local->tm_year + 1900, Local->tm_mon + 1, Local->tm_mday);
 	return;
 }

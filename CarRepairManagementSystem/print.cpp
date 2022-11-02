@@ -782,6 +782,47 @@ void print_CarOwner_info(int x, int y, int OrderID)
 	}
 	return;
 }
+void print_CarOwner_info_safe(int x, int y, int OrderID)
+{
+	IMAGE CarOwner_Info_BG;
+	loadimage(&CarOwner_Info_BG, _T(".\\IMAGES\\CarOwner_Info_BG.png"), 370, 85);
+	putimage(x, y, &CarOwner_Info_BG);
+
+	//MYsql的查询操作
+	MYSQL_RES* res; //查询结果集
+	MYSQL_ROW row;  //记录结构体
+	//查询数据
+	char query_str[512] = "";
+	char owner_name[32] = "";
+	char owner_phone[32] = "";
+
+	//查询订单信息
+	sprintf(query_str, "SELECT Owner,Phone FROM order_list WHERE order_list.OrderID=%d;", OrderID);
+	mysql_query(&mysql, query_str);
+	//获取结果集
+	res = mysql_store_result(&mysql);
+	row = mysql_fetch_row(res);
+
+	settextcolor(COLOR_GREY_2);
+	settextstyle(20, 0, FONT);
+	if (row == NULL)
+	{
+		outtextxy(x + 150, y + 35, "无相关信息");
+		outtextxy(x + 150, y + 65, "无相关信息");
+	}
+	else
+	{
+		strcpy(owner_name, row[0]);
+		strcpy(owner_phone, row[1]);
+		owner_phone[3] = '*';
+		owner_phone[4] = '*';
+		owner_phone[5] = '*';
+		owner_phone[6] = '*';
+		outtextxy(x + 150, y + 35, owner_name);
+		outtextxy(x + 150, y + 65, owner_phone);
+	}
+	return;
+}
 
 
 void print_order_page_repair(int page, int count, int status)

@@ -31,8 +31,8 @@ int main()
 
 #ifdef DEBUG
 	//在DEBUG模式下直接进入相应的界面
-	int MENUchoice = 104;
-	UserID = 42;
+	int MENUchoice = 102;
+	UserID = 22;
 #endif // DEBUG
 
 #ifndef DEBUG
@@ -46,7 +46,7 @@ int main()
 		case 0:
 			//程序结束
 			mysql_close(&mysql);
-
+			closegraph();
 			return 0;
 		case 1:
 			MENUchoice = startMENU();

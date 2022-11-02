@@ -51,6 +51,8 @@ void print_quality_detail_info(int x, int y, int OrderID);
 //打印车主信息模块
 void print_CarOwner_info(int x, int y, int OrderID);
 
+void print_CarOwner_info_safe(int x, int y, int OrderID);
+
 //打印一页订单信息
 //含有“维修”字样，限定打印状态
 void print_order_page_repair(int page, int count, int status);
