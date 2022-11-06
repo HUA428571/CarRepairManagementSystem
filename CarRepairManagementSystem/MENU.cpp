@@ -794,16 +794,6 @@ int ReceptionMENU_AddMENU()
 				mysql_query(&mysql, query_str);
 				//获取结果集
 				res = mysql_store_result(&mysql);
-				// if (res != NULL)
-				//{
-				//	QualityStaffID = atoi(row[0]);
-				//	clearrectangle(295, 592, 295 + 88, 592 + 22);
-				//	settextstyle(22, 0, FONT);
-				//	print_rect = { 295, 592, 295 + 88, 592 + 22 };
-				//	drawtext(buffer_QualityStaffName, &print_rect, DT_CENTER | DT_VCENTER);
-				//	check_QualityStaffID = true;
-				// }
-				// row = mysql_fetch_row(res);
 				if (res != NULL && (row = mysql_fetch_row(res)) != NULL)
 				{
 					QualityStaffID = atoi(row[0]);

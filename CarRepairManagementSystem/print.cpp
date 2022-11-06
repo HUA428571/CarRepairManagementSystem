@@ -124,7 +124,6 @@ void print_StorageMENU_MainMENU_background()
 }
 
 
-
 void print_order_id(int x, int y, int OrderID)
 {
 	//¥Ú”°∂©µ•∫≈
