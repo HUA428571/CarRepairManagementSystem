@@ -1533,7 +1533,6 @@ int RepairMENU_MainMENU()
 	//维修员主页,显示订单信息
 	//获取订单数
 	int count_all; //订单总数
-	int count_finish;
 	int current_page = 0;
 	int max_page = 0;
 	// sort_flag=0,显示所有订单
@@ -1955,7 +1954,6 @@ int RepairMENU_RepairMENU(int OrderID)
 	char part_name[60] = "";
 	int repair_record_RepairPartID; //维修零件编号
 	int repair_record_num;			//维修零件使用数量
-	int part_price;					//维修零件价格
 	int storage_part_num;			//维修零件库存
 	int storage_part_req;
 	int add_RepairPartID; //维修零件编号
@@ -2283,7 +2281,6 @@ int QualityMENU_MainMENU()
 	//质检员主页,显示订单信息
 	//获取订单数
 	int count_all; //订单总数
-	int count_finish;
 	int current_page = 0;
 	int max_page = 0;
 	// sort_flag=0,显示所有订单
@@ -2830,7 +2827,6 @@ int QualityMENU_QualityMENU(int OrderID)
 
 	//等待鼠标
 	int MENUchoice = QualityMENU_QualityMENU_MENUChoose();
-	int row_clicked; //当前行数（对应SQL中）
 
 	while (true)
 	{
